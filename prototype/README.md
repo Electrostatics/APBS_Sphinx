@@ -51,12 +51,45 @@ are multiple values per tag?*
 
 I'm leaning towards a hash of tags.  A tag with multiple values would contain a
 sub-hash of tagged values.
+
+So what does this semantic tagging look like?  A hash of key-value pairs.
+Examples of real-world things that we use:
+* PQR File: `{"Type": "File", "Extension": "pqr", "Sources": "Atomic Data"}`
+* DX File: `{"Type": "File", "Extension": "dx", "Sources": "Atomic Surface Data"}`
+
+
+* Atomic Datum: `{"Type": "Atomic Datum", "Fields": ["x", "y", "z", "radius", "charge"]}`
+* Atomic Surface Datum: `{"Type": "Atomic Surface Datum", "Fields": ["x", "y", "z", "charge"]}`
+
+
+* APBS MG Solver
+```Python
+{"Type": "Process", "Name": "apbs-mg",
+    "Sinks": ["Atomic Surface Data", "APBS MG User Config"],
+    "Sources": "Atomic Surface Data"}
+```
+* PDB2PQR `{"Type": "Process", "Name": "pdb2pqr", "Sinks": ["Atomic Data", "PDB2PQR User Config"], "Sources": "Atomic Data"}`
+* PyMol `{"Type": "Process", "Name": "pymol", "Sinks": ["Atomic Data", "Atomic Surface Data"]}`
+
+Miscellaneous information must also be attached to data.  This is most important
+because we want to be able to tag data with versions, provenance information,
+etc.  For example:
+* `{"Version": x.y.z}`
+* `{"Name": "foo"}`
+* `{"Input Parameters": ["-x", "--name='blah'", "vdw"]}`
+
+There need to be a formal set of methods to query semantic tags.
 *...end of musings...*
 
 
-### Sinks and Sources
+### On Sinks and Sources
 Data flows from a *Source* to a *Sink*.  A particular plug-in may be a source,
 a sink, or both.
+
+It may help to think of sinks and sources as work products.  Take a PDB file
+for example.  In the context of PBD2PQR, the PDB would be a source of PDB2PQR,
+since PDB2PQR *creates*, or *sources* PDB files.  However in the context of
+APBS it would be a *sink*, since APBS *reads* PDB files.
 
 ## Plug-in Modules
 As previously mentioned, plug-ins may be sources, or sinks, and typically both.

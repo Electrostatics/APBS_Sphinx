@@ -38,43 +38,101 @@
 # THE POSSIBILITY OF SUCH DAMAGE.
 #}}}
 
-import asyncio
+from nose.tools import *
 
+from sphinx.databus import SDBController
 from sphinx.plugin import BasePlugin
 
 __author__ = 'Keith T. Star <keith@pnnl.gov>'
 
-class CommandPlugin(BasePlugin):
-	'''Plugin for parsing command files
-	It seems like this should be made into a base class for file reading source
-	plug-ins.  The base class would specify a standard signature of <file,
-	optional_args>.  Likely as not there would be other standard bits.
-	'''
-	def __init__(self, file, user_args, *args):
-		super().__init__(*args)
-		self._file = file
-		self._args = user_args
-		print("Command Plug-in processing: {} ({})".format(file, user_args))
+def setup_plugins():
+	global databus
 
+	databus = SDBController()
+	databus.add_plugin(TestPlugin)
+	databus.add_plugin(SymmetricTestPlugin)
+	databus.add_plugin(DuplicateTestPlugin)
+
+
+@with_setup(setup_plugins)
+def test_add_plugin():
+	# Test that the sources are properly captured.
+	foo_sources = databus.sources_for({'Type': 'file/.foo'})
+	assert_equal(2, len(foo_sources))
+	assert_in(TestPlugin, foo_sources)
+	assert_in(DuplicateTestPlugin, foo_sources)
+
+	bar_sources = databus.sources_for({'Type': 'bar'})
+	assert_equal(1, len(bar_sources))
+	assert_in(SymmetricTestPlugin, bar_sources)
+
+	baz_sources = databus.sources_for({'Type': 'baz'})
+	assert_equal(1, len(baz_sources))
+	assert_in(SymmetricTestPlugin, baz_sources)
+
+	# Test that the sinks are properly captured.
+	foo_sinks = databus.sinks_for({'Type': 'file/.foo'})
+	assert_equal(1, len(foo_sinks))
+	assert_in(SymmetricTestPlugin, foo_sinks)
+
+	bar_sinks = databus.sinks_for({'Type': 'bar'})
+	assert_equal(2, len(bar_sinks))
+	assert_in(TestPlugin, bar_sinks)
+	assert_in(DuplicateTestPlugin, bar_sinks)
+
+	baz_sinks = databus.sinks_for({'Type': 'baz'})
+	assert_equal(2, len(baz_sinks))
+	assert_in(TestPlugin, baz_sinks)
+	assert_in(DuplicateTestPlugin, baz_sinks)
+
+
+class TestPlugin(BasePlugin):
+	'''Super simple plugin that has sources and sinks
+	'''
+	def __init__(self):
+		super().__init__()
 
 	@classmethod
 	def sinks(cls):
-		return [{'Type': 'file/.in'}]
+		return [{'Type': 'bar'}, {'Type': 'baz'}]
 
 	@classmethod
 	def sources(cls):
-		return [
-			{'Type': 'plug-in/runner', }
-		]
+		return [{'Type': 'file/.foo'}]
 
-
-	@asyncio.coroutine
 	def run(self):
-		with open(self._file, 'r') as file:
-			for line in file:
-				print('from file: \t', line)
-				exec(line)
+		pass
 
-		while True:
-			print ("hey")
-			yield from asyncio.sleep(7)
+class SymmetricTestPlugin(BasePlugin):
+	'''Super simple plugin that is symmetric to TestPlugin
+	'''
+	def __init__(self):
+		super().__init__()
+
+	@classmethod
+	def sinks(cls):
+		return [{'Type': 'file/.foo'}]
+
+	@classmethod
+	def sources(cls):
+		return [{'Type': 'bar'}, {'Type': 'baz'}]
+
+	def run(self):
+		pass
+
+class DuplicateTestPlugin(BasePlugin):
+	'''Super simple plugin that is identical to TestPlugin
+	'''
+	def __init__(self):
+		super().__init__()
+
+	@classmethod
+	def sinks(cls):
+		return [{'Type': 'bar'}, {'Type': 'baz'}]
+
+	@classmethod
+	def sources(cls):
+		return [{'Type': 'file/.foo'}]
+
+	def run(self):
+		pass

@@ -11,13 +11,6 @@
 # Pacific Northwest National Laboratory, operated by Battelle Memorial
 # Institute, Pacific Northwest Division for the U.S. Department of Energy.
 #
-# Portions Copyright (c) 2002-2010, Washington University in St. Louis.
-# Portions Copyright (c) 2002-2010, Nathan A. Baker.
-# Portions Copyright (c) 1999-2002, The Regents of the University of
-# California.
-# Portions Copyright (c) 1995, Michael Holst.
-# All rights reserved.
-#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
 #
@@ -45,7 +38,8 @@
 # THE POSSIBILITY OF SUCH DAMAGE.
 #}}}
 
-from abc import ABCMeta
+from abc import ABCMeta, abstractmethod
+from asyncio import coroutine
 
 __all__ = ['BasePlugin']
 
@@ -57,9 +51,68 @@ class BasePlugin(metaclass=ABCMeta):
 	useful.  Those are defined here, with default implementations where it
 	makes sense.
 	'''
-	def __init__(self):
+
+	# This is a handle to the data bus.  It's set when we are registered.
+	_databus = None
+
+	def __init__(self, loop):
+		'''Ctor
+		This method _must_ be called with the event loop from which it will be
+		called in the future, e.g., asyncio.get_event_loop().
+		'''
+		self._task = None
+		self._loop = loop
+
+
+	@classmethod
+	def sinks(cls):
+		'''Sink types
+		These are an array of types that we sink, i.e., read.
+		'''
+		return []
+
+	def feed(self, data):
+		'''Feed a source.
+		This method is called on an instance of a plug-in in order to give it
+		data.
+		'''
 		pass
 
+
+	def consume(self):
+		'''
+		'''
+
+
+	@classmethod
+	def sources(cls):
+		'''Source types
+		These are an array of types that we source, i.e., write.
+		'''
+		return []
+
+
+	@classmethod
+	def set_databus(cls, db):
+		'''A handler to the Semantic Databus
+		This gets set when the plug-in is registered.
+		'''
+		cls._databus = db
+
+
 	@abstractmethod
-	def register_plugin(self):
+	@coroutine
+	def run(self):
+		'''Our main method where work is done
+		This is the method that will be invoked when the plug-in needs to do
+		some work.
+		'''
 		pass
+
+
+	def start(self):
+		'''Start the plug-in
+		This method should be called to start the plug-in by whomever set up
+		the asyncio event loop.
+		'''
+		self._task = self._loop.create_task(self.run())

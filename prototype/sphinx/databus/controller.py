@@ -11,13 +11,6 @@
 # Pacific Northwest National Laboratory, operated by Battelle Memorial
 # Institute, Pacific Northwest Division for the U.S. Department of Energy.
 #
-# Portions Copyright (c) 2002-2010, Washington University in St. Louis.
-# Portions Copyright (c) 2002-2010, Nathan A. Baker.
-# Portions Copyright (c) 1999-2002, The Regents of the University of
-# California.
-# Portions Copyright (c) 1995, Michael Holst.
-# All rights reserved.
-#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
 #
@@ -45,9 +38,13 @@
 # THE POSSIBILITY OF SUCH DAMAGE.
 #}}}
 
+import logging
+
 __all__ = ['SDBController']
 
 __author__ = 'Keith T. Star <keith@pnnl.gov>'
+
+_log = logging.getLogger()
 
 class SDBController:
 	'''Semantic Databus Controller
@@ -55,4 +52,65 @@ class SDBController:
 	themselves, and to request data from other plug-ins.
 	'''
 	def __init__(self):
-		pass
+		self._source_types = {}
+		self._sink_types = {}
+
+
+	def add_plugin(self, plugin):
+		'''Plug-ins are registered here
+		In order to use a plug-in with the databus it must be registered with
+		the databus via this method.  Here we interrogate the plug-in for the
+		types that it soures as well as sinks, and store that data with a
+		reference to the plugin class.
+		We also give the plug-in a reference to ourself so that it can request
+		data.
+		'''
+		_log.info('Registering plug-in "{}" '.format(plugin.__name__) +
+			'with sources {} '.format(plugin.sources()) +
+			 'and sinks {}.'.format(plugin.sinks()))
+		plugin.set_databus(self)
+
+		for source in plugin.sources():
+			self._get_plugin_list(source, self._source_types).append(plugin)
+
+		for sink in plugin.sinks():
+			self._get_plugin_list(sink, self._sink_types).append(plugin)
+
+
+	def sources_for(self, type):
+		'''Get plug-ins that grok a source.
+		Return a list (array) of plug-ins that source the type argument.
+		'''
+		return self._get_plugin_list(type, self._source_types)
+
+
+	def sinks_for(self, type):
+		'''Get plug-ins that grok a sink
+		'''
+		return self._get_plugin_list(type, self._sink_types)
+
+	def _get_plugin_list(self, key, dict):
+		'''Return an array buried in a dictionary of semantic types
+		Our lists of sink and source handlers are indexed by a hierarchy of
+		keys where deeper levels are more specific instances of a type.
+		A type can increase specificity by using slashes.
+		'''
+		type = key['Type'].split('/')
+		first = type.pop(0)
+		try:
+			handlers = dict[first]
+		except KeyError:
+			dict[first] = handlers = {}
+
+		for t in type:
+			try:
+				handlers = handlers[t]
+			except KeyError:
+				handlers[t] = handlers = {}
+
+		try:
+			plugins = handlers['__plugins__']
+		except KeyError:
+			handlers['__plugins__'] = plugins = []
+
+		return plugins

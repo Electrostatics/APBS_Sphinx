@@ -11,13 +11,6 @@
 # Pacific Northwest National Laboratory, operated by Battelle Memorial
 # Institute, Pacific Northwest Division for the U.S. Department of Energy.
 #
-# Portions Copyright (c) 2002-2010, Washington University in St. Louis.
-# Portions Copyright (c) 2002-2010, Nathan A. Baker.
-# Portions Copyright (c) 1999-2002, The Regents of the University of
-# California.
-# Portions Copyright (c) 1995, Michael Holst.
-# All rights reserved.
-#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
 #

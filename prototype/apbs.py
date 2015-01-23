@@ -12,13 +12,6 @@
 # Pacific Northwest National Laboratory, operated by Battelle Memorial
 # Institute, Pacific Northwest Division for the U.S. Department of Energy.
 #
-# Portions Copyright (c) 2002-2010, Washington University in St. Louis.
-# Portions Copyright (c) 2002-2010, Nathan A. Baker.
-# Portions Copyright (c) 1999-2002, The Regents of the University of
-# California.
-# Portions Copyright (c) 1995, Michael Holst.
-# All rights reserved.
-#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
 #
@@ -50,11 +43,9 @@ import sys
 import os
 import logging
 import argparse
-from importlib import import_module
+import asyncio
 
-import sphinx.databus
-
-print(os.path.dirname(sphinx.databus.__file__))
+from sphinx.core import Coordinator
 
 PLUGIN_DIR = "plugins"
 
@@ -66,51 +57,37 @@ logging.basicConfig(filename='io.mc', level=logging.INFO,
 	format='%(asctime)s %(message)s')
 _log = logging.getLogger(os.path.basename(sys.argv[0]))
 
+
 def parse_args():
 	'''Parse command line arguments
 	For now I'm not terribly concerned about dealing with a bunch of different
 	options.  In fact, I think it would be best to keep them down in any case
 	and relegate options to the command files.
 	'''
-	parser = argparse.ArgumentParser(description='APBS (sphinx)')
-	parser.add_argument('command_files', metavar='cmd_file', nargs='+',
-		type=argparse.FileType('r'), help='file containing APBS commands')
+	parser = argparse.ArgumentParser(description="APBS (sphinx)")
+	parser.add_argument('command_file', metavar='cmd_file',
+		nargs=argparse.REMAINDER,
+		help="file containing APBS commands, followed by it's arguments")
 	parser.add_argument('-o', '--ontology', action='store_true',
 		help='display the SDB ontology')
 	args = parser.parse_args()
-	files = [file.name for file in args.command_files]
-	_log.info('Command files: {0}'.format(files))
 
-	return files
+	cmd = args.command_file[0]
+	cmd_args = args.command_file[1:]
+	_log.info('Command file: {}, args: {}'.format(cmd, cmd_args))
 
-def load_plugins(plugin_dir):
-	'''Load the plugins for use
-	This implementation is näive and just loads everything.  We can clearly do
-	better.
-	'''
-	plugins = {}
-	for file in os.listdir(plugin_dir):
-		if os.path.isdir(os.path.join(plugin_dir, file)):
-			plugins[file] = import_module(plugin_dir + '.' + file)
-
-	return plugins
+	return cmd, cmd_args
 
 
 def main():
 	try:
 		_log.info('Hello world, from APBS (sphinx).')
 
-		files = [os.path.splitext(file) for file in parse_args()]
-		plugins = load_plugins(PLUGIN_DIR)
+		# Get files from the command line
+		cmd, args = parse_args()
 
-		print(files)
-		print(plugins)
-
-		loop = asyncio.get_event_loop()
-		try:
-			loop.run_until_complete()
-		finally:
-			loop.close()
+		# Create, and start the "Coordinator"
+		Coordinator(PLUGIN_DIR).start(cmd, args)
 
 	except Exception as e:
 		_log.exception('Unhandled exception:')

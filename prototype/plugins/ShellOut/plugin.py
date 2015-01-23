@@ -37,3 +37,36 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 # THE POSSIBILITY OF SUCH DAMAGE.
 #}}}
+
+import asyncio
+import logging
+
+_log = logging.getLogger()
+
+from sphinx.plugin import BasePlugin
+
+__author__ = 'Keith T. Star <keith@pnnl.gov>'
+
+class ShellOut(BasePlugin):
+	'''An example of calling a subprocess
+	'''
+	def __init__(self, *args):
+		super().__init__(*args)
+		self._process = None
+		print("ShellOut started")
+
+	@classmethod
+	def sources(cls):
+		return [{'Type': 'ls/l'}]
+
+	@asyncio.coroutine
+	def run(self):
+		'''In this example we are starting another process via the shell.
+		Again, as with the server example, we need to return the result of
+		creating the Task.
+		'''
+		self._process = yield from asyncio.create_subprocess_shell('ls -l',
+			stdout=asyncio.subprocess.PIPE)
+		self._process_output, _ = yield from self._process.communicate()
+
+		return self._process
