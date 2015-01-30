@@ -1,7 +1,13 @@
-# Example to run an APBS multigrid calculation
-# The parameters are setup here -- all it needs is a .pqr file.
+# Example to run a Geoflow calculation.
+# Maybe replace foo.pqr with "arg1" or something so that we can pass it in from
+# the APBS command line invocation.
 #
 read_file('foo.pqr')
-parse_pqr()                  // file/.pqr
-run_geoflow()                // elec/molecular/geoflow
+
+# file/.pqr
+parse_pqr()
+
+# elec/molecular/geoflow
+run_geoflow()
+
 write_file('result.txt')
