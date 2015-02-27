@@ -54,11 +54,6 @@
 
 #pragma once
 
-// From the original f90 code; need to keep this
-// constant since the f90 routines that we call from here
-// depend on it.
-#define MAXATOMS 15000
-
 // Four because: 0-2 => pos, 3 => radius
 #define XYZRWIDTH 4
 
@@ -108,6 +103,6 @@ typedef struct _GeoflowInput
 #ifdef __cplusplus
 extern "C"
 #endif
-GeoflowOutput geoflowSolvation(double xyzr[MAXATOMS][XYZRWIDTH], size_t natm,
+GeoflowOutput geoflowSolvation(double xyzr[][XYZRWIDTH], size_t natm,
 		GeoflowInput gfin);
 

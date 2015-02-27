@@ -56,7 +56,7 @@
 #include "modules.h"
 
 double qbboundary(size_t natm, double x,double y,double z,
-		double xyzr[MAXATOMS][XYZRWIDTH], double* pqr, double epsilonsp)
+		double xyzr[][XYZRWIDTH], double* pqr, double epsilonsp)
 {
 	double vbdn = 0;
 	for (size_t a = 0; a < natm; ++a) {
@@ -89,7 +89,7 @@ double qbinterior(double x,double y,double z, Mat<>& charget, Mat<>& corlocqt)
 	return fp;
 }
 
-double qb(size_t i,size_t j,size_t k, double xyzr[MAXATOMS][XYZRWIDTH],
+double qb(size_t i,size_t j,size_t k, double xyzr[][XYZRWIDTH],
 		double* pqr, Mat<>& charget, Mat<>& corlocqt, double epsilonsp)
 {
 	double x = xvalue(i);
@@ -104,7 +104,7 @@ double qb(size_t i,size_t j,size_t k, double xyzr[MAXATOMS][XYZRWIDTH],
 	}
 }
 
-void seteqb(Mat<>& bg, double xyzr[MAXATOMS][XYZRWIDTH], double* pqr,
+void seteqb(Mat<>& bg, double xyzr[][XYZRWIDTH], double* pqr,
 		Mat<>& charget, Mat<>& corlocqt, double epsilonsp)
 {
 	for (size_t i = 1; i <= comdata.nx; ++i) {

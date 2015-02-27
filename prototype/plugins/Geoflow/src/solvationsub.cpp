@@ -58,7 +58,7 @@
 #include "Mat.h"
 #include "modules.h"
 
-void chargedist(double xyzr[MAXATOMS][XYZRWIDTH],
+void chargedist(double xyzr[][XYZRWIDTH],
 double* chratm, Mat<>& charget, Mat<>& corlocqt, Mat<size_t>& loc_qt, size_t iatm){
 	double x_q = xyzr[iatm-1][0];
 	double y_q = xyzr[iatm-1][1];

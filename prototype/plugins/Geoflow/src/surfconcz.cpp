@@ -69,7 +69,7 @@ double right(const std::valarray<double>& pr, double h, double ev)
 	return ceil( (pr + ev).max()/h ) * h + ev;
 }
 
-void domainini(double xyzr[MAXATOMS][XYZRWIDTH], const size_t natm,
+void domainini(double xyzr[][XYZRWIDTH], const size_t natm,
 		const double extvalue)
 {
 	double dx = comdata.deltax, dy = comdata.deltay, dz = comdata.deltaz;
@@ -214,7 +214,7 @@ void potIntegral(double rcfactor, size_t natm,
 //void adicor(double* su, double* g, double& ddx, double& dt, int& nz,int& ny,
 //		int& nx, double* phitotx);
 
-void yhsurface(double xyzr[MAXATOMS][XYZRWIDTH], double* ljepsilon, size_t natm,
+void yhsurface(double xyzr[][XYZRWIDTH], double* ljepsilon, size_t natm,
 		double tott, double dt, Mat<>& phitotx, Mat<>& surfu, int iloop,
 		double& area, double& volume, double& attint, double alpha, int iadi,
 		int igfin)

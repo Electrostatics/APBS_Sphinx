@@ -80,18 +80,18 @@ struct LJ
 };
 extern LJ lj;
 
-void domainini(double xyzr[MAXATOMS][XYZRWIDTH], const size_t natm,
+void domainini(double xyzr[][XYZRWIDTH], const size_t natm,
 		const double extvalue);
 
-void chargedist(double xyzr[MAXATOMS][XYZRWIDTH], double* chratm,
+void chargedist(double xyzr[][XYZRWIDTH], double* chratm,
 		Mat<>& charget, Mat<>& corlocqt, Mat<size_t>& loc_qt, size_t iatm);
 
-void yhsurface(double xyzr[MAXATOMS][XYZRWIDTH], double* ljepsilon, size_t natm,
+void yhsurface(double xyzr[][XYZRWIDTH], double* ljepsilon, size_t natm,
 		double tott, double deltat, Mat<>& phix, Mat<>& surfu, int i,
 		double& area, double& vol, double& attint, double alpha, int iadi,
 		int igfin);
 
-void seteqb(Mat<>& bg, double xyzr[MAXATOMS][XYZRWIDTH], double* pqr,
+void seteqb(Mat<>& bg, double xyzr[][XYZRWIDTH], double* pqr,
 		Mat<>& charget, Mat<>& corlocqt, double epsilonsp);
 
 void pbsolver(Mat<>& eps, Mat<>& phi, Mat<>& bg, double tol, int iter);
