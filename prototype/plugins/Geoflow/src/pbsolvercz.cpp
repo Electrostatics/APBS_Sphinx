@@ -77,7 +77,7 @@ void pbsolver(Mat<>& eps, Mat<>& phi, Mat<>& bgf, double tol, int iter)
 		}
 	}
 
-	std::vector <Eigen::Triplet<double>> tripletList;
+	std::vector <Eigen::Triplet<double> > tripletList;
 	tripletList.reserve(nx*ny*nz);
 	Eigen::VectorXd phi_flat(nx*ny*nz);
 
