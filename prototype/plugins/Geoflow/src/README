@@ -1,0 +1,28 @@
+Create python wrapper around Geoflow
+
+Uses the standalone code as a basis of what we need to do, but it should
+be double checked.
+
+Geoflow outputs a bunch of stuff to stdout. This should be removed and
+the code should instead return the values needed.
+
+The code builds out of the box on Linux. Building on OS X and Windows
+requires some tinkering. On Windows, `/LIBPATH:C:\Python34\libs` needs
+to be added to CMAKE_MODULES_LINKER_FLAGS (or whatever directory
+contains the proper version of python??.lib), and it must be built in
+release mode (building in debug mode requires a debug build of Python).
+On OS X, `-Wl,-undefined,dynamic_lookup` needs to be added to
+CMAKE_MODULES_LINKER_FLAGS to prevent the linker from complaining about
+unresolved Python symbols that will get bound when the module is loaded.
+
+I'm currently trying to find a clean way to have this work automatically
+everywhere. If I can't, I'll add some platform checks to CMakeLists.txt
+to take care of it.
+
+The code can be tried as follows:
+
+>>> import geoflow
+
+>>> gf = geoflow.Geoflow(pres_i=0.008, gama_i=0.0001, npiter=1, ngiter=1, tauval=1.40, prob=0.0, ffmodel=1, sigmas=1.5828, epsilonw=0.1554, vdwdispersion=0, extvalue=1.90, iadi=0, alpha=0.50, tol=1e-4, tottf=3.5, dcel=0.25, maxstep=20, epsilons=80.00, epsilonp=1.5, radexp=1, crevalue=0.01, density=0.03346)
+
+>>> gf.process_molecule({'atoms':[{'pos': [0.0, 0.0, 0.0], 'radius': 1.87, 'charge': -0.257}, {'pos': [1.375, 0.0, 0.0], 'radius': 1.40, 'charge': -0.317}, {'pos': [1.764, 1.292, 0.0], 'radius': 1.87, 'charge': 0.398}]})
