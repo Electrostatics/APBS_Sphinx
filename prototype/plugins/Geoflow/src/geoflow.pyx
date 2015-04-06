@@ -19,7 +19,7 @@ cdef double _get_gama_step(double gama):
 	else:
 		return 0.005
 
-cdef class Geoflow:
+cdef class Geoflow_Solver:
 	cdef double _pres_i
 	cdef double _gama_i
 	cdef int _npiter
@@ -156,7 +156,7 @@ cdef class Geoflow:
 	def process_molecule(self, molecule):
 		cdef double pres, pres_step, gama, gama_step, tpb
 		cdef int indpres, indgama, igfin, iterf, itert
-		
+
 		results = []
 
 		pres = self._pres_i
