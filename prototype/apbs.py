@@ -55,6 +55,8 @@ __author__ = 'Keith T. Star <keith@pnnl.gov>'
 # convinced that we shouldn't.
 logging.basicConfig(filename='io.mc', level=logging.INFO,
 	format='%(asctime)s %(message)s')
+
+# TODO: log errors to stderr.
 _log = logging.getLogger(os.path.basename(sys.argv[0]))
 
 
@@ -65,15 +67,13 @@ def parse_args():
 	and relegate options to the command files.
 	'''
 	parser = argparse.ArgumentParser(description="APBS (sphinx)")
-	parser.add_argument('command_file', metavar='cmd_file',
-		nargs=argparse.REMAINDER,
+	parser.add_argument('command_file', metavar='cmd_file', nargs=1,
 		help="file containing APBS commands, followed by it's arguments")
-	parser.add_argument('-o', '--ontology', action='store_true',
-		help='display the SDB ontology')
+	parser.add_argument('cmd_args', nargs=argparse.REMAINDER)
 	args = parser.parse_args()
 
 	cmd = args.command_file[0]
-	cmd_args = args.command_file[1:]
+	cmd_args = args.cmd_args
 	_log.info('Command file: {}, args: {}'.format(cmd, cmd_args))
 
 	return cmd, cmd_args
