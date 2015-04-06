@@ -95,6 +95,9 @@ class SDBController:
 		keys where deeper levels are more specific instances of a type.
 		A type can increase specificity by using slashes.
 		'''
+		# TODO: We need more than just 'Type' to justify a dict.  It's also
+		# keeping us from doing something like:
+		# 	{'Type': ['atom/elec', 'atom/apolar', 'text'] }
 		type = key['Type'].split('/')
 		first = type.pop(0)
 		try:
