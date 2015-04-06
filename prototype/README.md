@@ -14,7 +14,7 @@ The process is anything but automagic, and we hope to fix that before too much l
 7. `cp geoflow.so ../..`
 
 ## Running the Beast
-From `<sphinx_repo>` try this:
+From `<sphinx_repo>/prototype` try this:
 `./apbs.py example/geoflow.apbs infile=example/imidazole.xyzr outfile=imidazole.txt`
 
 You'll know it's done when you see `solv[iloop-1] = -3.5836` on stdout.  Ctrl-C to escape.  Yes, lame.  Yes, rough.  Yes prototype.  Yes, it works.
