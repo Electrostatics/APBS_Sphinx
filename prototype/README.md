@@ -1,132 +1,46 @@
 # Sphinx Prototype
-## Introduction
-The purpose of this prototype is to illustrate some ideas I have for the
-project, and yet thus far, have been unable to convey.
+This is still very much in the prototype phase.  Beyond here there be monsters!
 
-## Points Worth Mention
-### Plug-in Modules
-Plug-in modules provide all the useful functionality of Sphinx.
+## Building the Beast
+First off, you'll need Python 3.4.3.  Python 3.4 may work just as well, but I haven't tried.  You'll also need a C++11 compiler and CMake.
 
-### Semantic Databus
-Data is shared betwixt the plug-ins via what I've dubbed the **Semantic
-Databus**, or **SDB**.  The core idea here is that we don't want to become
-obsolete as soon as we define an API.  We need a way to share data between
-modules that we don't even know about.
+The process is anything but automagic, and we hope to fix that before too much longer.
 
-This is where the *semantic* bit comes in play.  We define an extensible data
-ontology that we use to tag data.
+7. `cd <sphinx_repo>/prototype/plugins/Geoflow/src`
+7. `mkdir build`
+7. `cd build`
+7. `cmake ..`
+7. `make`
+7. `cp geoflow.so ../..`
 
-The first level of abstraction is the **record**, which contains a complete
-datum.  The SDB surfaces a function to retrieve a record from a *named* data
-source.
+## Running the Beast
+From `<sphinx_repo>` try this:
+`./apbs.py example/geoflow.apbs infile=example/imidazole.xyzr outfile=imidazole.txt`
 
-A record consists of a hash whose keys are semantic tags, and values are the
-data itself.  For hierarchal data, a value may itself be another hash.  If a
-value is not hierarchal, and still has a cardinality greater than one, it will
-be presented as an array.  The implication is that the ordering of the values
-is unimportant.  If the order matters, then the data should be tagged.
+You'll know it's done when you see `solv[iloop-1] = -3.5836` on stdout.  Ctrl-C to escape.  Yes, lame.  Yes, rough.  Yes prototype.  Yes, it works.
 
-Each plug-in is responsible for maintaining its own data store.  When the SDB
-is queried for a record, it passes that query to the plug-in, which should then
-provide the record asynchronously.  This implies that a plug-in may reads data
-asynchronously, e.g., from a file, or over a network.
+It just ran the geometric flow solver on *imidazole.xyzr* and printed some electrostatic information about the molecule into *imidazole.txt*.  It also (without you explicitly asking for it to do so) did the same for *diet.xyzr* and printed it's output to *diet.txt*.
 
-*...thinking out loud...*
-Let's not tag sources and sinks, but the data itself.
+Oh, there's this crazy *io.mc* file too, although there's not really much in it that's useful.
 
-For file types we have a file-type tag, that plug-ins can use to specify the
-type of file they read.  Sphinx itself can surface values of file-type based
-on extension, *magic number*, or something else.  This would let us wrap the
-file itself as data with a tag that's the type of file.  Thus making it
-consistent with the tagged data model.
+It's worth noting that the file *geoflow.apbs* is Python code, and that it's really just for playing with what's possible using Python to specify instructions.  In reality we may provide a file like it, but minus the hardcoded *diet* bits.
 
-The data read from a file will be partitioned and tagged by the input plug-in,
-according to whatever is appropriate for the data in the file, as determined by
-the plug-in.
+###This is important here
+The main takeaway is that the user can use, on the command line, a **pre-written** APBS command file that takes named parameters and operates on what those parameters specify.  In this case, run the Geometric Flow solver on the *imidazole.xyzr* file and put the results in *imidazole.txt*.
+###Thanks for paying extra-special attention
 
-Consumers of the data will query by **record**, which is the standard
-subdivision for data.  Each record will contain tagged fields.  *How are the
-fields accessed?  Is it an array?  A mapping of tag to value?  What if there
-are multiple values per tag?*
+## Anatomy of the Beast
+More to come.
 
-I'm leaning towards a hash of tags.  A tag with multiple values would contain a
-sub-hash of tagged values.
-
-So what does this semantic tagging look like?  A hash of key-value pairs.
-Examples of real-world things that we use:
-* PQR File: `{"Type": "File", "Extension": "pqr", "Sources": "Atomic Data"}`
-* DX File: `{"Type": "File", "Extension": "dx", "Sources": "Atomic Surface Data"}`
-
-
-* Atomic Datum: `{"Type": "Atomic Datum", "Fields": ["x", "y", "z", "radius", "charge"]}`
-* Atomic Surface Datum: `{"Type": "Atomic Surface Datum", "Fields": ["x", "y", "z", "charge"]}`
-
-
-* APBS MG Solver
-```Python
-{"Type": "Process", "Name": "apbs-mg",
-    "Sinks": ["Atomic Surface Data", "APBS MG User Config"],
-    "Sources": "Atomic Surface Data"}
-```
-* PDB2PQR `{"Type": "Process", "Name": "pdb2pqr", "Sinks": ["Atomic Data", "PDB2PQR User Config"], "Sources": "Atomic Data"}`
-* PyMol `{"Type": "Process", "Name": "pymol", "Sinks": ["Atomic Data", "Atomic Surface Data"]}`
-
-Miscellaneous information must also be attached to data.  This is most important
-because we want to be able to tag data with versions, provenance information,
-etc.  For example:
-* `{"Version": x.y.z}`
-* `{"Name": "foo"}`
-* `{"Input Parameters": ["-x", "--name='blah'", "vdw"]}`
-
-There need to be a formal set of methods to query semantic tags.
-*...end of musings...*
-
-
-### On Sinks and Sources
-Data flows from a *Source* to a *Sink*.  A particular plug-in may be a source,
-a sink, or both.
-
-It may help to think of sinks and sources as work products.  Take a PDB file
-for example.  In the context of PBD2PQR, the PDB would be a source of PDB2PQR,
-since PDB2PQR *creates*, or *sources* PDB files.  However in the context of
-APBS it would be a *sink*, since APBS *reads* PDB files.
-
-## Plug-in Modules
-As previously mentioned, plug-ins may be sources, or sinks, and typically both.
-For some reason, I've chosen to hyphenate plug-in in favor of the single word
-variant: plugin.
-
-### Read a File
-A plug-in that *groks* a particular file format registers itself with the SDB
-as such by specifying the format in terms of a set of file extensions.  When a
-file with one of these extensions is to be ingested by Sphinx, this plug-in is
-called upon to read the file.  The data that is read may then be queried by
-subsequent plug-ins.
-
-The format for registration is *SDB_source({file-type: [ext, ...]})*.
-
-### Write a File
-The format for registration is *SDB_sink({file-type: [ext, ...]})*.
-
-### Process a Command File
-Command files specify a flow of data between plug-ins.  They are declarative
-in nature, which simplifies creation of data pipelines.
-
-### C Example
-Example of a plug-in that is linked to some C code.
-
-## Included Examples
-There are a few different examples included.
-
-### Read / Transform / Write
-This example pipeline reads the contents of a file and converts lowercase
-letters to uppercase.
-
-The salient points are that there is a
-
-### Streaming
-
-### Tee Pipeline
-
-## Potentially Useful Plug-ins
-* Chemical Markup Language (CML) Importer
+## TODO
+7. It should run asynchronously, but there's still some work to be done getting our plugins to cooperate and do that.
+7. The Geometric Flow plugin needs a means of taking parameters.  I suggest that all the solver plug-ins take a parameter file.  Something like the .in files of yore.
+7. Remove all the debug junk that's printed in Geoflow.
+7. Get the Semantic Databus idea into working shape
+7. Validate plug-in pipelines
+7. Extend this command line mode with something more user friendly.  Hey maybe extend that *SillyServer* plugin (what's that there for anyway?) to spawn a browser and connect to Sphinx, thus providing the user a GUI?  What?  That's crazy talk!
+7. Moar solvers!
+...
+7. There are a lot of TODO's in the source code.
+...
+7. *Ad nauseum*
