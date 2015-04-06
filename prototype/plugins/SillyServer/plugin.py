@@ -39,10 +39,13 @@
 #}}}
 
 import asyncio
+import logging
 
 from sphinx.plugin import BasePlugin
 
 __author__ = 'Keith T. Star <keith@pnnl.gov>'
+
+_log = logging.getLogger()
 
 class SillyServer(BasePlugin):
 	'''A web server example plug-in
@@ -54,7 +57,12 @@ class SillyServer(BasePlugin):
 
 		self._connections = {}
 
-		print("SillyServer started on {} {}.".format(host, port))
+		_log.info("SillyServer started on {} {}.".format(host, port))
+
+
+	@classmethod
+	def script_name(cls):
+		return "silly_server"
 
 
 	@classmethod

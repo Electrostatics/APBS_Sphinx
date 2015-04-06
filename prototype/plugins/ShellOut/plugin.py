@@ -41,23 +41,30 @@
 import asyncio
 import logging
 
-_log = logging.getLogger()
-
 from sphinx.plugin import BasePlugin
 
 __author__ = 'Keith T. Star <keith@pnnl.gov>'
 
+_log = logging.getLogger()
+
 class ShellOut(BasePlugin):
 	'''An example of calling a subprocess
 	'''
-	def __init__(self, *args):
-		super().__init__(*args)
+	def __init__(self, **kwargs):
+		super().__init__(**kwargs)
 		self._process = None
-		print("ShellOut started")
+		_log.info("ShellOut started")
+
+
+	@classmethod
+	def script_name(cls):
+		return "shell_out"
+
 
 	@classmethod
 	def sources(cls):
 		return [{'Type': 'ls/l'}]
+
 
 	@asyncio.coroutine
 	def run(self):
