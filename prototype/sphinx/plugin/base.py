@@ -39,7 +39,9 @@
 #}}}
 
 from abc import ABCMeta, abstractmethod
-from asyncio import coroutine
+from asyncio import coroutine, Queue
+
+from functools import partial
 
 __all__ = ['BasePlugin']
 
@@ -55,13 +57,50 @@ class BasePlugin(metaclass=ABCMeta):
 	# This is a handle to the data bus.  It's set when we are registered.
 	_databus = None
 
-	def __init__(self, loop):
+	def __init__(self, loop, plugins, source = None):
 		'''Ctor
 		This method _must_ be called with the event loop from which it will be
 		called in the future, e.g., asyncio.get_event_loop().
 		'''
-		self._task = None
+		self._sinks = []
+
+		# Retain a pointer to our source, and add ourself to it's list of sinks.
+		self._source = source
+		if source:
+			source._sinks.append(self)
+
+		# Producer/consumer queue
+		self._queue = Queue()
+
+
 		self._loop = loop
+		self._plugins = plugins
+
+		# create_task schedules the execution of the coroutine "run", wrapped
+		# in a future.
+		self._task = self._loop.create_task(self.run())
+
+
+	def __getattr__(self, name):
+		'''Plugin Pipeline Bulding
+		This method is called when Python can't find a requested attribute. We
+		use it to create a new plugin instance to add to the pipeline.
+		'''
+		if name in self._plugins:
+			return partial(self._plugins[name], source = self)
+
+		else:
+			raise AttributeError
+
+	@coroutine
+	def publish(self, data):
+		for sink in self._sinks:
+			yield from sink._queue.put(data)
+
+
+	@coroutine
+	def done(self):
+		yield from self.publish(None)
 
 
 	@classmethod
@@ -70,18 +109,6 @@ class BasePlugin(metaclass=ABCMeta):
 		These are an array of types that we sink, i.e., read.
 		'''
 		return []
-
-	def feed(self, data):
-		'''Feed a source.
-		This method is called on an instance of a plug-in in order to give it
-		data.
-		'''
-		pass
-
-
-	def consume(self):
-		'''
-		'''
 
 
 	@classmethod
@@ -100,6 +127,14 @@ class BasePlugin(metaclass=ABCMeta):
 		cls._databus = db
 
 
+	@classmethod
+	def script_name(cls):
+		'''Return the plug-in's script name.
+		The script name is how the plug-in is referred to by command scripts.
+		'''
+		pass
+
+
 	@abstractmethod
 	@coroutine
 	def run(self):
@@ -108,11 +143,3 @@ class BasePlugin(metaclass=ABCMeta):
 		some work.
 		'''
 		pass
-
-
-	def start(self):
-		'''Start the plug-in
-		This method should be called to start the plug-in by whomever set up
-		the asyncio event loop.
-		'''
-		self._task = self._loop.create_task(self.run())

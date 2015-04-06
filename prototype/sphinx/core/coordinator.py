@@ -41,6 +41,7 @@
 import os
 import asyncio
 from importlib import import_module
+from functools import partial
 
 from sphinx.databus import SDBController
 
@@ -54,6 +55,7 @@ class Coordinator:
 	def __init__(self, plugins):
 		self._plugin_dir = plugins
 		self._plugins = {}
+		self._plugin_funcs = {}
 		self._databus = None
 		self._loop = None
 
@@ -74,22 +76,14 @@ class Coordinator:
 		self._load_plugins()
 
 		print("Ctrl-C to quit.")
-		try:
-			# Load the command file that was passed to us.  This feels like
-			# a hokey way to go about it.
-			file, ext  = os.path.splitext(cmd_file)
-			plugin_list = self._databus.sinks_for({'Type': 'file/' + ext})
-			if (len(plugin_list) == 0):
-				print("I don't know how to read {}{}.".format(file, ext))
-			else:
-				# Just grab the first one.  We either need a way no specify the
-				# plugin (or some other means) to disambiguate, or we need to
-				# simply disallow multiple plugins for the same data.  I'd
-				# prefer the former.
-				plugin_list[0](file + ext, cmd_args, self._loop).start()
 
-			self._plugins['SillyServer'](self._loop).start()
-			self._plugins['ShellOut'](self._loop).start()
+		locals = dict([(p[0], p[1]) for p in [x.split('=') for x in cmd_args]])
+
+		try:
+			# Load and process the command file.  It's just Python.
+			with open(cmd_file) as cf:
+				code = compile(cf.read(), cmd_file, 'exec')
+				exec(code, self._plugin_funcs, {'params':locals})
 
 			self._loop.run_forever()
 		finally:
@@ -97,18 +91,27 @@ class Coordinator:
 
 
 	def _load_plugins(self):
-		'''Load the plugins for use
+		'''Load the plugins
 		This implementation is näive and just loads everything.  We can clearly
 		do better.
 		'''
 		print(os.getcwd())
 		for file in os.listdir(self._plugin_dir):
-			print(file)
 			if os.path.isdir(os.path.join(self._plugin_dir, file)):
 				# For now I'm thinking that we'll require the plug-in author to
 				# put their plug-in in a file called plugin.py, inside of a
 				# module that is named the same as their class implementation in
 				# the plugin.py file.
-				self._plugins[file] = getattr(import_module(self._plugin_dir +
-					'.' + file + '.plugin'), file)
-				self._databus.add_plugin(self._plugins[file])
+				plugin = getattr(import_module(self._plugin_dir + '.' + file +
+					'.plugin'), file)
+				self._plugins[file] = plugin
+				self._databus.add_plugin(plugin)
+
+				# TODO: This is pretty lame, but it's a quick and dirty way to
+				# see how this script thing is going to work out.
+				self._plugin_funcs[plugin.script_name()] = partial(plugin,
+					loop = self._loop, plugins = self._plugin_funcs)
+
+
+	def _debug_me(self, *args):
+		print("fubar {}".format(args))
