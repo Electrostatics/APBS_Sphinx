@@ -40,14 +40,19 @@
 
 import os
 import asyncio
+import logging
 from importlib import import_module
 from functools import partial
+
+from concurrent.futures import ProcessPoolExecutor
 
 from sphinx.databus import SDBController
 
 __all__ = ['Coordinator']
 
 __author__ = 'Keith T. Star <keith@pnnl.gov>'
+
+_log = logging.getLogger()
 
 class Coordinator:
 	'''Sphinx Main Runner-thing
@@ -58,6 +63,7 @@ class Coordinator:
 		self._plugin_funcs = {}
 		self._databus = None
 		self._loop = None
+		self._tasks = []
 
 
 	def start(self, cmd_file, cmd_args):
@@ -72,22 +78,53 @@ class Coordinator:
 		else:
 			self._loop = asyncio.get_event_loop()
 
+		self._executor = ProcessPoolExecutor()
+		self._loop.set_default_executor(self._executor)
+
 		self._databus = SDBController()
 		self._load_plugins()
 
-		print("Ctrl-C to quit.")
+		print("Ctrl-C to escape...")
 
 		locals = dict([(p[0], p[1]) for p in [x.split('=') for x in cmd_args]])
 
 		try:
 			# Load and process the command file.  It's just Python.
+			_log.info("Reading command file.")
 			with open(cmd_file) as cf:
 				code = compile(cf.read(), cmd_file, 'exec')
 				exec(code, self._plugin_funcs, {'params':locals})
 
-			self._loop.run_forever()
+			_log.info("Starting the run loop.")
+			self._loop.run_until_complete(asyncio.wait(self._tasks))
+
+		except KeyboardInterrupt:
+			pass
 		finally:
-			self._loop.close()
+			self.stop()
+
+
+	def stop(self):
+		self._executor.shutdown()
+		self._loop.stop()
+		self._loop.close()
+		_log.info("The run loop is shut down.")
+
+
+	@asyncio.coroutine
+	def run_as_process(self, func, args):
+		results = yield from self._loop.run_in_executor(self._executor, func,
+				args)
+
+		return results
+
+
+	def create_task(self, func):
+		task = self._loop.create_task(func)
+
+		self._tasks.append(task)
+
+		return task
 
 
 	def _load_plugins(self):
@@ -110,8 +147,4 @@ class Coordinator:
 				# TODO: This is pretty lame, but it's a quick and dirty way to
 				# see how this script thing is going to work out.
 				self._plugin_funcs[plugin.script_name()] = partial(plugin,
-					loop = self._loop, plugins = self._plugin_funcs)
-
-
-	def _debug_me(self, *args):
-		print("fubar {}".format(args))
+					runner = self, plugins = self._plugin_funcs)

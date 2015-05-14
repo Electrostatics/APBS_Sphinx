@@ -83,7 +83,7 @@ class SillyServer(BasePlugin):
 		create a Server and return it.
 		'''
 		self._server = yield from asyncio.start_server(self._connection,
-			self._host,	self._port,	loop=self._loop)
+			self._host,	self._port,	loop=self.runner._loop)
 		return self._server
 
 

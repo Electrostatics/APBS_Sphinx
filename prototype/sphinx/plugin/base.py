@@ -57,7 +57,7 @@ class BasePlugin(metaclass=ABCMeta):
 	# This is a handle to the data bus.  It's set when we are registered.
 	_databus = None
 
-	def __init__(self, loop, plugins, source = None):
+	def __init__(self, runner, plugins, source = None):
 		'''Ctor
 		This method _must_ be called with the event loop from which it will be
 		called in the future, e.g., asyncio.get_event_loop().
@@ -73,12 +73,12 @@ class BasePlugin(metaclass=ABCMeta):
 		self._queue = Queue()
 
 
-		self._loop = loop
+		self.runner = runner
 		self._plugins = plugins
 
 		# create_task schedules the execution of the coroutine "run", wrapped
 		# in a future.
-		self._task = self._loop.create_task(self.run())
+		self._task = self.runner.create_task(self.run())
 
 
 	def __getattr__(self, name):
