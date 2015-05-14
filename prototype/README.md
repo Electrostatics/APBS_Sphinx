@@ -23,10 +23,12 @@ It just ran the geometric flow solver on *imidazole.xyzr* and printed some elect
 
 Oh, there's this crazy *io.mc* file too, although there's not really much in it that's useful.
 
-It's worth noting that the file *geoflow.apbs* is Python code, and that it's really just for playing with what's possible using Python to specify instructions.  In reality we may provide a file like it, but minus the hardcoded *diet* bits.
+It's worth noting that the file *geoflow.apbs* is Python code, and that it's really just for playing with what's possible using Python to specify pipelines.  Whether or not we continue to use the same Python syntax is still up in the air.  It may make more sense to create a DSL for specifying pipelines.
 
 ###This is important here
-The main takeaway is that the user can use, on the command line, a **pre-written** APBS command file that takes named parameters and operates on what those parameters specify.  In this case, run the Geometric Flow solver on the *imidazole.xyzr* file and put the results in *imidazole.txt*.
+The main takeaway is that \*.apbs files specify *plugin pipelines*.  A typical user can specify, on the command line, a **pre-written** APBS command file (\*.apbs) that takes named parameters and operates on what those parameters specify.  In this case, run the Geometric Flow solver on the *imidazole.xyzr* file and put the results in *imidazole.txt*.
+
+An atypical user may choose to create their own pipeline files, and thus gain much more control over how the data is processed.  We provide different levels of control to suit both typical and power users.
 ###Thanks for paying extra-special attention
 
 ## Anatomy of the Beast
