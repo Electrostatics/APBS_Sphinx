@@ -50,20 +50,36 @@ __author__ = 'Keith T. Star <keith@pnnl.gov>'
 
 _log = logging.getLogger()
 
+
+def run_geoflow(atoms):
+	'''Start the geoflow process.
+	We have to instantiate the solver, and then run 'process_molecule' in the
+	same process.  There isn't much point in making this a method of the
+	plugin class.  At least not that I can see now.  There may however be a
+	better way to do this in the future.
+	'''
+	# TODO: All of the following belong in a configuration file.  I like the
+	# idea of a geoflow config building module.  It would assist the user
+	# with the meaning of the various values, as well as tracking, naming and
+	# locating the configs the user has created.
+	solver = Geoflow_Solver(pres_i=0.008, gama_i=0.0001, npiter=1,
+			ngiter=1, tauval=1.40, prob=0.0, ffmodel=1, sigmas=1.5828,
+			epsilonw=0.1554, vdwdispersion=0, extvalue=1.90, iadi=0,
+			alpha=0.50, tol=1e-4, tottf=3.5, dcel=0.25, maxstep=20,
+			epsilons=80.00, epsilonp=1.5, radexp=1, crevalue=0.01,
+			density=0.03346)
+
+	result = solver.process_molecule(atoms)
+
+	del solver
+	return result
+
+
 class Geoflow(BasePlugin):
 	'''Plugin for running geometric flow
 	'''
 	def __init__(self, **kwargs):
 		self._atoms = []
-		# TODO: All of the following belong in a configuration file.  I like the
-		# idea of a geoflow config building module.  It would assist the user
-		# with the meaning of the various values, as well as tracking, naming and
-		# locating the configs the user has created.
-		self._solver = Geoflow_Solver(pres_i=0.008, gama_i=0.0001, npiter=1,
-			ngiter=1, tauval=1.40, prob=0.0, ffmodel=1, sigmas=1.5828,
-			epsilonw=0.1554, vdwdispersion=0, extvalue=1.90, iadi=0, alpha=0.50,
-			tol=1e-4, tottf=3.5, dcel=0.25, maxstep=20, epsilons=80.00,
-			epsilonp=1.5, radexp=1, crevalue=0.01, density=0.03346)
 
 		super().__init__(**kwargs)
 		_log.info("Geoflow plug-in initialized.")
@@ -97,10 +113,9 @@ class Geoflow(BasePlugin):
 				else:
 					break
 
-			print("running geoflow")
-			# Run Geoflow
-			result = yield from self._loop.run_in_executor(None,
-				self._solver.process_molecule, {'atoms': self._atoms})
+			# Run Geoflow in a separate process
+			result = yield from self.runner.run_as_process(run_geoflow,
+					{'atoms': self._atoms})
 
 			yield from self.publish(json.dumps(result))
 			yield from self.done()
