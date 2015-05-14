@@ -87,9 +87,11 @@ def main():
 		cmd, args = parse_args()
 
 		# Create, and start the "Coordinator"
-		Coordinator(PLUGIN_DIR).start(cmd, args)
+		coordinator = Coordinator(PLUGIN_DIR)
+		coordinator.start(cmd, args)
 
 	except Exception as e:
+		coordinator.stop()
 		_log.exception('Unhandled exception:')
 
 if __name__ == '__main__':
