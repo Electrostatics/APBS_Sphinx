@@ -85,3 +85,5 @@ class WriteFile(BasePlugin):
 					file.write(data + "\n")
 				else:
 					break
+
+		_log.info("WriteFile: wrote {}.".format(self._file))

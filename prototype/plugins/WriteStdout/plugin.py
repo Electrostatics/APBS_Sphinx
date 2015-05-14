@@ -80,6 +80,10 @@ class WriteStdout(BasePlugin):
 		while True:
 			data = yield from self._queue.get()
 			if data:
+				_log.info("WriteStdout: writing {}".format(data))
 				sys.stdout.write(data)
+				sys.stdout.flush()
 			else:
 				break
+
+		_log.info("WriteStdout: done")

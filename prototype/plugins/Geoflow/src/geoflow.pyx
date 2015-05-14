@@ -1,6 +1,10 @@
 cimport cpbconcz2
 from cython.view cimport array as cvarray
 
+import logging
+
+_log = logging.getLogger()
+
 cdef double _get_pres_step(double pres):
 	if pres < 0.001:
 		return 0.0001
@@ -44,6 +48,8 @@ cdef class Geoflow_Solver:
 	cdef int _radexp
 	cdef double _crevalue
 	cdef double _density  # (use 0.03346)
+
+	cdef int _pid
 
 	def __cinit__(self):
 		self._pres_i = 0
@@ -94,6 +100,9 @@ cdef class Geoflow_Solver:
 		self._radexp = radexp
 		self._crevalue = crevalue
 		self._density = density
+
+		import os
+		self._pid = os.getpid()
 
 	cdef _process_molecule(self, molecule, int igfin, double tpb, int iterf,
 			int itert, double pres, double gama):
@@ -161,6 +170,8 @@ cdef class Geoflow_Solver:
 
 		pres = self._pres_i
 
+		_log.info("({}): Geometric flow solver started.".format(self._pid))
+
 		for indpres in range(self._npiter):
 			pres_step = _get_pres_step(pres)
 			if indpres > 0:
@@ -180,4 +191,5 @@ cdef class Geoflow_Solver:
 			results.append(self._process_molecule(molecule, igfin, tpb, iterf,
 					itert, pres, gama))
 
+		_log.info("({}): Geometric flow solver done.".format(self._pid))
 		return results
