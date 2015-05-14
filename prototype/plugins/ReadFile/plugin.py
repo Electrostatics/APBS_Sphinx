@@ -70,11 +70,6 @@ class ReadFile(BasePlugin):
 			{'Type': 'text', }
 		]
 
-	# def publish(self, data):
-	# 	print ('my sinks', self._sinks)
-	# 	for sink in self._sinks:
-	# 		print('publishing', data)
-	# 		yield from sink._queue.put(data)
 
 	@asyncio.coroutine
 	# I don't know that this is necessary, so much as it proves pedagogical.
