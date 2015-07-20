@@ -2,7 +2,7 @@
 This is still very much in the prototype phase.  Beyond here there be monsters!
 
 ## Building the Beast
-First off, you'll need Python 3.4.3.  Python 3.4 may work just as well, but I haven't tried.  You'll also need a C++11 compiler and CMake.
+First off, you'll need Python 3.4.3.  Python 3.4.x may work just as well, but I haven't tried.  You'll also need a C++11 compiler and CMake.
 
 The process is anything but automagic, and we hope to fix that before too much longer.
 
@@ -20,9 +20,7 @@ We are currently using Nose to run the unit tests.  From the `prototype` directo
 From `<sphinx_repo>/prototype` try this:
 `./apbs.py example/geoflow.apbs infile=example/imidazole.xyzr outfile=imidazole.txt`
 
-You'll know it's done when you see `solv[iloop-1] = -3.5836` on stdout.  Ctrl-C to escape.  Yes, lame.  Yes, rough.  Yes prototype.  Yes, it works.
-
-It just ran the geometric flow solver on *imidazole.xyzr* and printed some electrostatic information about the molecule into *imidazole.txt*.  It also (without you explicitly asking for it to do so) did the same for *diet.xyzr* and printed it's output to *diet.txt*.
+It just ran the geometric flow solver on *imidazole.xyzr* and printed some electrostatic information about the molecule into *imidazole.txt*.
 
 Oh, there's this crazy *io.mc* file too, although there's not really much in it that's useful.
 
@@ -34,11 +32,13 @@ The main takeaway is that \*.apbs files specify *plugin pipelines*.  A typical u
 An atypical user may choose to create their own pipeline files, and thus gain much more control over how the data is processed.  We provide different levels of control to suit both typical and power users.
 ###*Thanks for paying extra-special attention*
 
+## Running Solvers in Parallel
+There is a really simple example of running two geoflow jobs in example/dual-geoflow.apbs.  It may be run as above.  It will solve the imidazole molecule, as well as *diet.xyzr*.  The latter is hardcoded to print it's results to *diet.txt*.  This example shows that two solvers may run concurrently, as well as how it's possible to hardcode information (the input and output files) into a command file (.apbs).
+
 ## Anatomy of the Beast
 There is a [work-in-progress white paper](https://github.com/Electrostatics/APBS_Sphinx/wiki/Sphinx%20White%20Paper) on Sphinx that dwells on some of the details.
 
 ## TODO
-7. It should run asynchronously, but there's still some work to be done getting our plugins to cooperate and do that.
 7. The Geometric Flow plugin needs a means of taking parameters.  I suggest that all the solver plug-ins take a parameter file.  Something like the .in files of yore.
 7. Remove all the debug junk that's printed in Geoflow.
 7. Get the Semantic Databus idea into working shape
