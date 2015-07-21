@@ -49,10 +49,10 @@ __author__ = 'Keith T. Star <keith@pnnl.gov>'
 _log = logging.getLogger()
 
 class ParseXYZR(BasePlugin):
-	'''Plugin for parsing command files
-	It seems like this should be made into a base class for file reading source
-	plug-ins.  The base class would specify a standard signature of <file,
-	optional_args>.  Likely as not there would be other standard bits.
+	'''Plugin for parsing "xyzr" files.
+	This plugin parses files that contain atomic data where each row is an
+	atom.  The first three columns are it's X, Y, and Z positions in space,
+	the fourth column is it's radius, and the fifth column is it's charge.
 	'''
 	def __init__(self, **kwargs):
 		super().__init__(**kwargs)
