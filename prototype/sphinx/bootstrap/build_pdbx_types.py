@@ -45,18 +45,23 @@ import re
 import simplejson as json
 import sys
 
-from utils import *
+from ..utils import *
 
-__all__ = ['do_it']
+__all__ = ['generate_types']
 
 __author__ = 'Keith T. Star <keith@pnnl.gov>'
 
 _log = logging.getLogger()
 
-MMCIF_PDBX = os.path.join(os.path.dirname(__file__), 'mmcif_pdbx_v40.dic')
+MODULE_DIR = os.path.dirname(__file__)
+MMCIF_PDBX = os.path.join(MODULE_DIR, 'mmcif_pdbx_v40.dic')
 SCHEMA_NAME = 'PDBxmmCIF.json'
 
-def do_it(output_directory):
+def generate_types():
+	generate_pdbx_mmcif_schema(os.path.join(MODULE_DIR, '../databus'))
+
+
+def generate_pdbx_mmcif_schema(output_directory):
 	'''Generate our base data types for atomic data.
 	We use the PDBx/mmCIF schema dictionary from mmcif.wwpdb.org to generate
 	code that we use with the databus, which allows for data interchange
@@ -74,70 +79,138 @@ def do_it(output_directory):
 	dic.read(data)
 	dic_handle.close()
 
-	cats = get_categories(data)
-	schema = gen_schema(cats)
+	pdbx = load_schema(data)
+	process_schema(pdbx)
+	schema = gen_schema(pdbx, output_directory)
 
 	schema_handle = open(os.path.join(output_directory, SCHEMA_NAME), 'w')
 	schema_handle.write(schema)
 	schema_handle.close()
 
 
-def gen_schema(categories):
+def process_schema(pdbx):
+	'''Fix links, etc.
+	Process what we loaded from the PDBx/mmCIF parser so that we can 
+	resolve item/property pointers.  And whatever else pops up.
+	'''
+	for id, item in pdbx['items'].items():
+		if len(item['refs']) > 0:
+			for ref in item['refs']:
+				ref_item = pdbx['items'][ref]
+				ref_item['type'] = 'ptr'
+				ref_item['ptr'] = id[1:].replace('.', '/properties/')
+
+def gen_schema(pdbx, uri):
 	'''Generate the schema
 	We'll be using a Python dict to hold our schema, and turn it into
 	JSON using simplejson.
 	'''
 	schema = {
 		'$schema': 'http://json-schema.org/draft-04/schema#',
-		'id': 'http://mmcif.wwpdb.org/' + SCHEMA_NAME,
-		'definitions': {}
+		'id': 'file:///{}/{}'.format(uri, SCHEMA_NAME),
+		'definitions': {},
+		'properties': {},
+		'type': 'object'
 	}
 
 	defs = schema['definitions']
-	for cat_def in categories:
-		name = cat_def['name']
-		cat = defs[name] = {'type': 'object', 'properties': {}, 'required': []}
+	main_props = schema['properties']
 
-		req = cat['required']
-		props = cat['properties']
-		for prop in cat['properties']:
-			
-		
+	for cat in pdbx['cats']:
+		'''
+		Create schema definitions for each category.
+		'''
+		defs[cat] = {
+			'type': 'object',
+			'properties': {},
+			'required': [],
+			'additionalProperties': False
+		}
+#main_props[cat] = {'$ref': '#/definitions/{}'.format(cat)}
+
+	for id, item in pdbx['items'].items():
+		'''
+		Create properties for the above definitions.
+		'''
+		item_id = item['item']
+		cat = item['category']
+		type = item['type']
+
+		if type == 'ptr':
+			defs[cat]['properties'][item_id] = {
+				'$ref': '#/definitions/{}'.format(item['ptr'])
+			}
+
+		else:
+			defs[cat]['properties'][item_id] = {'type': type}
+
+		if item['required']:
+			defs[cat]['required'].append(item_id)
 
 	return json.dumps(schema, sort_keys=True, indent=2 * ' ')
 
 
-def get_categories(data):
-	# Now we rip through the data blocks looking for 'categories', which
-	# contain 'items'.  A category can be roughly mapped to a class and
-	# it's items map to class member variables.
-	categories = {}
+def load_schema(data):
+	'''Load the schema using the given .cif file parser.
+	It turns out that we can't properly process the information without having
+	it loaded in memory first.  So that's what we do here.
+	'''
+	pdbx_dict = {'cats': [], 'items': {}}
 	for block in data:
 		if block.exists('category'):
 			get = partial(get_prop_from_cat, block)
-			new_cat = {'name': get('category', 'id'),
-				# Yuk.
-				'key': re.search('\w*\.(.*)', get('category_key', 'name')).group(1),
-				'properties': {}}
-
-			categories[new_cat['name']] = new_cat
+			id = get('category', 'id')
+			pdbx_dict['cats'].append(id)
 
 		elif block.exists('item'):
+			# It's possible that 
 			get = partial(get_prop_from_cat, block)
-			name = get_item_name(get)
-			cat_id = get('item', 'category_id')
-			item_type = get('item_type', 'code')
+			name = block.getName()
+			match = re.search('_(\w*)\.(.*)', name)
+			cat_id = match.group(1)
+			item_id = match.group(2)
+
+			# This is as check to be sure that we are getting the matching
+			# entry, since it's possible that there are multiple 'item'
+			# rows.  Sheesh.
+			item_name = get_item_name(get)
+			assert(item_name == name)
+
+			item_type = get_item_type(get)
 			required = get_required(get)
 
-			try:
-				props = categories[cat_id]['properties']
-				props[name] = {'type': item_type, 'required': required}
-			except KeyError:
-				# I don't think that this should happen, but it does.  In
-				# my estimation this is an error in the schema.
-				_log.info('Found an item ({}) without a category.'.format(name))
+			item_entry = {
+				'item': item_id,
+				'category': cat_id,
+				'type': item_type,
+				'required': required,
+				'refs': []
+			}
+			
+			if block.exists('item_linked'):
+				# This means that there are items out there that are really
+				# pointers to this one.  We'll need to collect those for later.
+				links = block.getObj('item_linked')
+				for i in range(links.getRowCount()):
+					item_entry['refs'].append(links.getValue('child_name', i))
 
-	return categories
+
+			pdbx_dict['items'][name] = item_entry
+
+		else:
+			print('found an unknown/unused block of type', block.getName())
+
+	return pdbx_dict
+
+
+def get_item_type(getter):
+	t = getter('item_type', 'code')
+	if t == 'float':
+		return 'number'
+	elif t == 'int':
+		return 'integer'
+	else:
+		return 'string'
 
 
 def get_required(getter):
@@ -150,7 +223,9 @@ def get_required(getter):
 
 def get_item_name(getter):
 	name = getter('item', 'name')
-	return re.search('\w*\.(.*)', name).group(1)
+	return name
+#match = re.search('_(\w*)\.(.*)', name)
+#return match.group(1), match.group(2)
 
 
 def get_prop_from_cat(block, cat_name, prop_name):
