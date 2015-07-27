@@ -41,6 +41,7 @@
 import asyncio
 import sys
 import logging
+import simplejson as json
 
 from sphinx.plugin import BasePlugin
 
@@ -78,12 +79,13 @@ class WriteStdout(BasePlugin):
 	@asyncio.coroutine
 	def run(self):
 		while True:
-			data = yield from self._queue.get()
+			data = yield from self.read_data()
 			if data:
 				_log.info("WriteStdout: writing {}".format(data))
-				sys.stdout.write(data)
+				sys.stdout.write(json.dumps(data, indent=2 * ' '))
 				sys.stdout.flush()
 			else:
+				# End of input
 				break
 
 		_log.info("WriteStdout: done")

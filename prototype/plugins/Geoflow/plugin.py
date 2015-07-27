@@ -40,7 +40,6 @@
 
 import asyncio
 import logging
-import simplejson as json
 
 from sphinx.plugin import BasePlugin
 
@@ -107,9 +106,9 @@ class Geoflow(BasePlugin):
 		try:
 			# Collect all of the atoms that are available.
 			while True:
-				data = yield from self._queue.get()
+				data = yield from self.read_data()
 				if data:
-					self._atoms.append(json.loads(data))
+					self._atoms.append(data)
 				else:
 					break
 
@@ -117,7 +116,7 @@ class Geoflow(BasePlugin):
 			result = yield from self.runner.run_as_process(run_geoflow,
 					{'atoms': self._atoms})
 
-			yield from self.publish(json.dumps(result))
+			yield from self.publish(result)
 			yield from self.done()
 		except Exception as e:
 			_log.exception('Unhandled exception:')

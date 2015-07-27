@@ -72,7 +72,8 @@ class ReadFile(BasePlugin):
 
 
 	@asyncio.coroutine
-	# I don't know that this is necessary, so much as it proves pedagogical.
+	# I don't know that this is necessary, so much as it may prove to be
+	# pedagogical.
 	def open(self):
 		return open(self._file, 'r')
 

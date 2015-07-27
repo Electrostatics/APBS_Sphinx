@@ -41,6 +41,7 @@
 from abc import ABCMeta, abstractmethod
 from asyncio import coroutine, Queue
 
+import simplejson as json
 from functools import partial
 
 __all__ = ['BasePlugin']
@@ -94,12 +95,30 @@ class BasePlugin(metaclass=ABCMeta):
 
 	@coroutine
 	def publish(self, data):
+		'''Publish data
+		Called by a plugin to publish data to it's sinks.
+		'''
+		# Turn the data dict into a JSON string before sending it.  This may
+		# not make a lot of sense yet, but eventually serialization for
+		# transport will be essential.
 		for sink in self._sinks:
-			yield from sink._queue.put(data)
+			yield from sink._queue.put(json.dumps(data))
+
+
+	@coroutine
+	def read_data(self):
+		'''Read data from queue
+		Called by plugins to get data from their sources.
+		'''
+		data = yield from self._queue.get()
+		return json.loads(data)
 
 
 	@coroutine
 	def done(self):
+		'''The plugin is finished
+		Called by a plugin to indicate to it's sinks that it has no more data.
+		'''
 		yield from self.publish(None)
 
 

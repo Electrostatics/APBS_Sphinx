@@ -40,7 +40,6 @@
 
 import asyncio
 import logging
-import simplejson as json
 
 from sphinx.plugin import BasePlugin
 
@@ -79,12 +78,13 @@ class ParseXYZR(BasePlugin):
 	@asyncio.coroutine
 	def run(self):
 		while True:
-			data = yield from self._queue.get()
+			data = yield from self.read_data()
 			if data:
 				x, y, z, r, c = data.split()
-				record = {'pos':(float(x), float(y), float(z)), 'radius': float(r), 'charge': float(c)}
+				record = {'pos':(float(x), float(y), float(z)), 'radius': float(r),
+					'charge': float(c)}
 
-				yield from self.publish(json.dumps(record, indent=4 * ' '))
+				yield from self.publish(record)
 			else:
 				break
 

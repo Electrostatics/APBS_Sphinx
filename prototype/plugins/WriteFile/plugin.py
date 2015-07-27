@@ -40,6 +40,7 @@
 
 import asyncio
 import logging
+import simplejson as json
 
 from sphinx.plugin import BasePlugin
 
@@ -48,10 +49,9 @@ __author__ = 'Keith T. Star <keith@pnnl.gov>'
 _log = logging.getLogger()
 
 class WriteFile(BasePlugin):
-	'''Plugin for parsing command files
-	It seems like this should be made into a base class for file reading source
-	plug-ins.  The base class would specify a standard signature of <file,
-	optional_args>.  Likely as not there would be other standard bits.
+	'''Plugin for writing a file
+	This plugin takes whatever it's given and writes it to the file it was
+	initialized with.
 	'''
 	def __init__(self, file, **kwargs):
 		self._file = file
@@ -80,10 +80,11 @@ class WriteFile(BasePlugin):
 	def run(self):
 		with open(self._file, 'w') as file:
 			while True:
-				data = yield from self._queue.get()
+				data = yield from self.read_data()
 				if data:
-					file.write(data + "\n")
+					file.write(json.dumps(data, indent=2 * ' '))
 				else:
+					# End of input
 					break
 
 		_log.info("WriteFile: wrote {}.".format(self._file))
