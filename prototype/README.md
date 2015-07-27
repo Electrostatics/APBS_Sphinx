@@ -6,6 +6,11 @@ First off, you'll need Python 3.4.3.  Python 3.4.x may work just as well, but I 
 
 The process is anything but automagic, and we hope to fix that before too much longer.
 
+### Generate JSON schema from PDBx/mmCIF star file
+7. `cd <sphinx_repo>/prototype`
+7. `./run_bootstrap.py`
+
+### Build the Geometric Flow plugin
 7. `cd <sphinx_repo>/prototype/plugins/Geoflow/src`
 7. `mkdir build`
 7. `cd build`
@@ -14,7 +19,7 @@ The process is anything but automagic, and we hope to fix that before too much l
 7. `cp geoflow.so ../..`
 
 ## Testing the Beast
-We are currently using Nose to run the unit tests.  From the `prototype` directory just run `nosetests`.  Note that you'll need the appropriate version for Python 3.  In my case (OS X using homebrew) I have to type `nosetests-3.4`.
+We are currently using Nose to run the unit tests.  From the `prototype` directory just run `nosetests`.  Note that you'll need the appropriate version for Python 3.  In my case (OS X using homebrew) I have to type `nosetests-3.4` in the `<sphinx_repo>/prototype` directory.
 
 ## Running the Beast
 From `<sphinx_repo>/prototype` try this:
