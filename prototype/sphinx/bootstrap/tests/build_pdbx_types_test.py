@@ -39,8 +39,8 @@
 #}}}
 
 from nose.tools import *
-from jsonschema import validate, ValidationError
 
+from jsonschema import validate, ValidationError
 import simplejson as json
 
 __author__ = 'Keith T. Star <keith@pnnl.gov>'

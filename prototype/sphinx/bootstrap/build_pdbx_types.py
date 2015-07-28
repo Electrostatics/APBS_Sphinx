@@ -126,7 +126,9 @@ def gen_schema(pdbx, uri):
 			'required': [],
 			'additionalProperties': False
 		}
-#main_props[cat] = {'$ref': '#/definitions/{}'.format(cat)}
+		# Add each category to the properties of the schema so that each may
+		# be instantiated, and validated.
+		main_props[cat] = {'$ref': '#/definitions/{}'.format(cat)}
 
 	for id, item in pdbx['items'].items():
 		'''
@@ -224,8 +226,6 @@ def get_required(getter):
 def get_item_name(getter):
 	name = getter('item', 'name')
 	return name
-#match = re.search('_(\w*)\.(.*)', name)
-#return match.group(1), match.group(2)
 
 
 def get_prop_from_cat(block, cat_name, prop_name):
