@@ -122,8 +122,6 @@ class Coordinator:
 					args)
 		except:
 			_log.info("We encountered an exception.  Goodbye.")
-
-		finally:
 			self.stop()
 
 		return results
