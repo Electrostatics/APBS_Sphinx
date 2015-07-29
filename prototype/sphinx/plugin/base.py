@@ -58,6 +58,9 @@ class BasePlugin(metaclass=ABCMeta):
 	# This is a handle to the data bus.  It's set when we are registered.
 	_databus = None
 
+	# Type manager handle
+	_tm = None
+
 	def __init__(self, runner, plugins, source = None):
 		'''Ctor
 		This method _must_ be called with the event loop from which it will be
@@ -72,7 +75,6 @@ class BasePlugin(metaclass=ABCMeta):
 
 		# Producer/consumer queue
 		self._queue = Queue()
-
 
 		self.runner = runner
 		self._plugins = plugins
@@ -144,6 +146,7 @@ class BasePlugin(metaclass=ABCMeta):
 		This gets set when the plug-in is registered.
 		'''
 		cls._databus = db
+		cls._tm = db._typemgr
 
 
 	@classmethod

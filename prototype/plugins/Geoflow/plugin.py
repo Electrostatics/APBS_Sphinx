@@ -108,7 +108,16 @@ class Geoflow(BasePlugin):
 			while True:
 				data = yield from self.read_data()
 				if data:
-					self._atoms.append(data)
+					data = data['apbs_atom']
+					self._atoms.append({
+						'pos': (
+							data['Cartn_x'],
+							data['Cartn_y'],
+							data['Cartn_z']
+						),
+						'radius': data['radius'],
+						'charge': data['charge']
+					})
 				else:
 					break
 

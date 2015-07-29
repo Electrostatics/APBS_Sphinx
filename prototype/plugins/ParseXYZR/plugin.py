@@ -77,12 +77,27 @@ class ParseXYZR(BasePlugin):
 
 	@asyncio.coroutine
 	def run(self):
+		seq = 1
 		while True:
 			data = yield from self.read_data()
 			if data:
 				x, y, z, r, c = data.split()
-				record = {'pos':(float(x), float(y), float(z)), 'radius': float(r),
-					'charge': float(c)}
+				record = self._tm.new_apbs_atom(
+						id='?',
+						label_alt_id='?',
+						label_asym_id='?',
+						label_atom_id='?',
+						label_comp_id='?',
+						label_entity_id='?',
+						label_seq_id = seq,
+						type_symbol = '?',
+						auth_asym_id = '?',
+						Cartn_x = float(x),
+						Cartn_y = float(y),
+						Cartn_z = float(z),
+						radius=float(r),
+						charge=float(c))
+				seq += 1
 
 				yield from self.publish(record)
 			else:

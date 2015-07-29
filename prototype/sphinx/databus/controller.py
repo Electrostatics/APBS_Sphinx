@@ -40,6 +40,8 @@
 
 import logging
 
+from .typemanager import *
+
 __all__ = ['SDBController']
 
 __author__ = 'Keith T. Star <keith@pnnl.gov>'
@@ -54,6 +56,19 @@ class SDBController:
 	def __init__(self):
 		self._source_types = {}
 		self._sink_types = {}
+		self._typemgr = TypeManager()
+
+		# TODO: I'm not sure if this is the best place to do this, but it's a
+		# place to do this.
+		# For now, at least, we need to add radius and charge to the atom_site
+		# in order for this to work with xyzr/geoflow.  We'll need to do this
+		# anyway, but it may not necessarily take this form.
+		self._typemgr.define_type('apbs_atom',
+				{
+					'radius': {'type': 'number'},
+					'charge': {'type': 'number'}
+				},
+				base='atom_site')
 
 
 	def add_plugin(self, plugin):
@@ -88,6 +103,7 @@ class SDBController:
 		'''Get plug-ins that grok a sink
 		'''
 		return self._get_plugin_list(type, self._sink_types)
+
 
 	def _get_plugin_list(self, key, dict):
 		'''Return an array buried in a dictionary of semantic types
