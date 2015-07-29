@@ -38,7 +38,7 @@
 # THE POSSIBILITY OF SUCH DAMAGE.
 #}}}
 
-from jsonschema import validate
+from jsonschema import validate, ValidationError
 import simplejson as json
 from functools import partial
 import os
@@ -94,7 +94,12 @@ class TypeManager:
 				d[method][k] = v
 
 		#TODO: (NB) I'm concerned that this may be too slow.
-		validate(d, self._schema)
+		try:
+			validate(d, self._schema)
+		except ValidationError:
+			_log.error('Validation Error: {}'.format(d))
+			raise
+
 		return d
 
 
