@@ -100,6 +100,10 @@ class Coordinator:
 
 		except KeyboardInterrupt:
 			pass
+
+		except Exception:
+			print("Oops -- something bad happened.  Check io.mc for details")
+
 		finally:
 			self.stop()
 
@@ -113,8 +117,14 @@ class Coordinator:
 
 	@asyncio.coroutine
 	def run_as_process(self, func, args):
-		results = yield from self._loop.run_in_executor(self._executor, func,
-				args)
+		try:
+			results = yield from self._loop.run_in_executor(self._executor, func,
+					args)
+		except:
+			_log.info("We encountered an exception.  Goodbye.")
+
+		finally:
+			self.stop()
 
 		return results
 
