@@ -8,7 +8,7 @@ The process is anything but automagic, and we hope to fix that before too much l
 
 ### Generate JSON schema from PDBx/mmCIF star file
 7. `cd <sphinx_repo>/prototype`
-7. `./run_bootstrap.py`
+7. `./bootstrap.py`
 
 ### Build the Geometric Flow plugin
 7. `cd <sphinx_repo>/prototype/plugins/Geoflow/src`
