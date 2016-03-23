@@ -107,7 +107,7 @@ def gen_schema(pdbx, uri):
 	'''
 	schema = {
 		'$schema': 'http://json-schema.org/draft-04/schema#',
-		'id': 'file:///{}/{}'.format(uri, SCHEMA_NAME),
+		'id': 'file:/{}/{}'.format(uri, SCHEMA_NAME),
 		'definitions': {},
 		'properties': {},
 		'type': 'object'

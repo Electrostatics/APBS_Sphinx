@@ -77,9 +77,9 @@ def test_atom_types():
 	'''
 	assert_is_none(validate({'atom_types': [{'symbol': 'C'}]}, schema))
 	assert_is_none(validate({'atom_types': [{'symbol': 'C',
-							'radius_bond': 1.10}]}, schema))
+	                                         'radius_bond': 1.10}]}, schema))
 	assert_is_none(validate({'atom_types': [{'symbol': 'C'},
-											{'symbol': 'N'}]}, schema))
+	                                        {'symbol': 'N'}]}, schema))
 
 
 @with_setup(setup_schema)
