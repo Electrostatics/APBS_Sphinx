@@ -1,0 +1,6 @@
+# Core dependencies
+simplejson
+jsonschema
+
+# Geoflow, and other C/C++ plugins
+cython
