@@ -8,7 +8,7 @@ the code should instead return the values needed.
 
 The code builds out of the box on Linux. Building on OS X and Windows
 requires some tinkering. On Windows, `/LIBPATH:C:\Python34\libs` needs
-to be added to CMAKE_MODULES_LINKER_FLAGS (or whatever directory
+to be added to CMAKE_MODULE_LINKER_FLAGS (or whatever directory
 contains the proper version of python??.lib), and it must be built in
 release mode (building in debug mode requires a debug build of Python).
 On OS X, `-Wl,-undefined,dynamic_lookup` needs to be added to
