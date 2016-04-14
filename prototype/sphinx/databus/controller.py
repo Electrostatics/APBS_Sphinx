@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*- {{{
-# vim: set fenc=utf-8 ft=python ff=unix noet sts=0 sw=4 ts=4 :
+# vim: set fenc=utf-8 ft=python ff=unix sw=4 ts=4 sts=4 et:
 # APBS -- Adaptive Poisson-Boltzmann Solver
 #
 #  Nathan A. Baker (nathan.baker@pnnl.gov)
@@ -7,7 +7,7 @@
 #
 #  Additional contributing authors listed in the code documentation.
 #
-# Copyright (c) 2010-2015 Battelle Memorial Institute. Developed at the
+# Copyright (c) 2010-2016 Battelle Memorial Institute. Developed at the
 # Pacific Northwest National Laboratory, operated by Battelle Memorial
 # Institute, Pacific Northwest Division for the U.S. Department of Energy.
 #
@@ -49,87 +49,87 @@ __author__ = 'Keith T. Star <keith@pnnl.gov>'
 _log = logging.getLogger()
 
 class SDBController:
-	'''Semantic Databus Controller
-	This controller is the main point of contact for plug-ins to register
-	themselves, and to request data from other plug-ins.
-	'''
-	def __init__(self):
-		self._source_types = {}
-		self._sink_types = {}
-		self._typemgr = TypeManager()
+    '''Semantic Databus Controller
+    This controller is the main point of contact for plug-ins to register
+    themselves, and to request data from other plug-ins.
+    '''
+    def __init__(self):
+        self._source_types = {}
+        self._sink_types = {}
+        self._typemgr = TypeManager()
 
-		# TODO: I'm not sure if this is the best place to do this, but it's a
-		# place to do this.
-		# For now, at least, we need to add radius and charge to the atom_site
-		# in order for this to work with xyzr/geoflow.  We'll need to do this
-		# anyway, but it may not necessarily take this form.
-		self._typemgr.define_type('apbs_atom',
-				{
-					'radius': {'type': 'number'},
-					'charge': {'type': 'number'}
-				},
-				base='atom_site')
-
-
-	def add_plugin(self, plugin):
-		'''Plug-ins are registered here
-		In order to use a plug-in with the databus it must be registered with
-		the databus via this method.  Here we interrogate the plug-in for the
-		types that it soures as well as sinks, and store that data with a
-		reference to the plugin class.
-		We also give the plug-in a reference to ourself so that it can request
-		data.
-		'''
-		_log.info('Registering plug-in "{}" '.format(plugin.__name__) +
-			'with sources {} '.format(plugin.sources()) +
-			 'and sinks {}.'.format(plugin.sinks()))
-		plugin.set_databus(self)
-
-		for source in plugin.sources():
-			self._get_plugin_list(source, self._source_types).append(plugin)
-
-		for sink in plugin.sinks():
-			self._get_plugin_list(sink, self._sink_types).append(plugin)
+        # TODO: I'm not sure if this is the best place to do this, but it's a
+        # place to do this.
+        # For now, at least, we need to add radius and charge to the atom_site
+        # in order for this to work with xyzr/geoflow.  We'll need to do this
+        # anyway, but it may not necessarily take this form.
+        self._typemgr.define_type('apbs_atom',
+                {
+                    'radius': {'type': 'number'},
+                    'charge': {'type': 'number'}
+                },
+                base='atom_site')
 
 
-	def sources_for(self, type):
-		'''Get plug-ins that grok a source.
-		Return a list (array) of plug-ins that source the type argument.
-		'''
-		return self._get_plugin_list(type, self._source_types)
+    def add_plugin(self, plugin):
+        '''Plug-ins are registered here
+        In order to use a plug-in with the databus it must be registered with
+        the databus via this method.  Here we interrogate the plug-in for the
+        types that it soures as well as sinks, and store that data with a
+        reference to the plugin class.
+        We also give the plug-in a reference to ourself so that it can request
+        data.
+        '''
+        _log.info('Registering plug-in "{}" '.format(plugin.__name__) +
+            'with sources {} '.format(plugin.sources()) +
+             'and sinks {}.'.format(plugin.sinks()))
+        plugin.set_databus(self)
+
+        for source in plugin.sources():
+            self._get_plugin_list(source, self._source_types).append(plugin)
+
+        for sink in plugin.sinks():
+            self._get_plugin_list(sink, self._sink_types).append(plugin)
 
 
-	def sinks_for(self, type):
-		'''Get plug-ins that grok a sink
-		'''
-		return self._get_plugin_list(type, self._sink_types)
+    def sources_for(self, type):
+        '''Get plug-ins that grok a source.
+        Return a list (array) of plug-ins that source the type argument.
+        '''
+        return self._get_plugin_list(type, self._source_types)
 
 
-	def _get_plugin_list(self, key, dict):
-		'''Return an array buried in a dictionary of semantic types
-		Our lists of sink and source handlers are indexed by a hierarchy of
-		keys where deeper levels are more specific instances of a type.
-		A type can increase specificity by using slashes.
-		'''
-		# TODO: We need more than just 'Type' to justify a dict.  It's also
-		# keeping us from doing something like:
-		# 	{'Type': ['atom/elec', 'atom/apolar', 'text'] }
-		type = key['Type'].split('/')
-		first = type.pop(0)
-		try:
-			handlers = dict[first]
-		except KeyError:
-			dict[first] = handlers = {}
+    def sinks_for(self, type):
+        '''Get plug-ins that grok a sink
+        '''
+        return self._get_plugin_list(type, self._sink_types)
 
-		for t in type:
-			try:
-				handlers = handlers[t]
-			except KeyError:
-				handlers[t] = handlers = {}
 
-		try:
-			plugins = handlers['__plugins__']
-		except KeyError:
-			handlers['__plugins__'] = plugins = []
+    def _get_plugin_list(self, key, dict):
+        '''Return an array buried in a dictionary of semantic types
+        Our lists of sink and source handlers are indexed by a hierarchy of
+        keys where deeper levels are more specific instances of a type.
+        A type can increase specificity by using slashes.
+        '''
+        # TODO: We need more than just 'Type' to justify a dict.  It's also
+        # keeping us from doing something like:
+        #   {'Type': ['atom/elec', 'atom/apolar', 'text'] }
+        type = key['Type'].split('/')
+        first = type.pop(0)
+        try:
+            handlers = dict[first]
+        except KeyError:
+            dict[first] = handlers = {}
 
-		return plugins
+        for t in type:
+            try:
+                handlers = handlers[t]
+            except KeyError:
+                handlers[t] = handlers = {}
+
+        try:
+            plugins = handlers['__plugins__']
+        except KeyError:
+            handlers['__plugins__'] = plugins = []
+
+        return plugins

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*- {{{
-# vim: set fenc=utf-8 ft=python ff=unix noet sts=0 sw=4 ts=4 :
+# vim: set fenc=utf-8 ft=python ff=unix sw=4 ts=4 sts=4 et:
 # APBS -- Adaptive Poisson-Boltzmann Solver
 #
 #  Nathan A. Baker (nathan.baker@pnnl.gov)
@@ -7,7 +7,7 @@
 #
 #  Additional contributing authors listed in the code documentation.
 #
-# Copyright (c) 2010-2015 Battelle Memorial Institute. Developed at the
+# Copyright (c) 2010-2016 Battelle Memorial Institute. Developed at the
 # Pacific Northwest National Laboratory, operated by Battelle Memorial
 # Institute, Pacific Northwest Division for the U.S. Department of Energy.
 #
@@ -48,32 +48,32 @@ __author__ = 'Keith T. Star <keith@pnnl.gov>'
 _log = logging.getLogger()
 
 class ShellOut(BasePlugin):
-	'''An example of calling a subprocess
-	'''
-	def __init__(self, **kwargs):
-		super().__init__(**kwargs)
-		self._process = None
-		_log.info("ShellOut started")
+    '''An example of calling a subprocess
+    '''
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._process = None
+        _log.info("ShellOut started")
 
 
-	@classmethod
-	def script_name(cls):
-		return "shell_out"
+    @classmethod
+    def script_name(cls):
+        return "shell_out"
 
 
-	@classmethod
-	def sources(cls):
-		return [{'Type': 'ls/l'}]
+    @classmethod
+    def sources(cls):
+        return [{'Type': 'ls/l'}]
 
 
-	@asyncio.coroutine
-	def run(self):
-		'''In this example we are starting another process via the shell.
-		Again, as with the server example, we need to return the result of
-		creating the Task.
-		'''
-		self._process = yield from asyncio.create_subprocess_shell('ls -l',
-			stdout=asyncio.subprocess.PIPE)
-		self._process_output, _ = yield from self._process.communicate()
+    @asyncio.coroutine
+    def run(self):
+        '''In this example we are starting another process via the shell.
+        Again, as with the server example, we need to return the result of
+        creating the Task.
+        '''
+        self._process = yield from asyncio.create_subprocess_shell('ls -l',
+            stdout=asyncio.subprocess.PIPE)
+        self._process_output, _ = yield from self._process.communicate()
 
-		return self._process
+        return self._process

@@ -8,9 +8,9 @@
 #  send(input).run_geoflow
 
 geo_output = (
-	read_file(params['infile'])
-		.parse_xyzr()
-		.geoflow()
+    read_file(params['infile'])
+        .parse_xyzr()
+        .geoflow()
 )
 
 geo_output.write_file(params['outfile'])
@@ -19,10 +19,10 @@ geo_output.write_stdout()
 
 # You can specify multiple chains
 (
-	# This is specifically meant to work by running apbs.py as directed in the
-	# README.md file.  Yes, it's lame, but it's a start.
-	read_file("./example/diet.xyzr")
-		.parse_xyzr()
-		.geoflow()
-		.write_file("diet.txt")
+    # This is specifically meant to work by running apbs.py as directed in the
+    # README.md file.  Yes, it's lame, but it's a start.
+    read_file("./example/diet.xyzr")
+        .parse_xyzr()
+        .geoflow()
+        .write_file("diet.txt")
 )

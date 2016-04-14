@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*- {{{
-# vim: set fenc=utf-8 ft=python ff=unix noet sts=0 sw=4 ts=4 :
+# vim: set fenc=utf-8 ft=python ff=unix sw=4 ts=4 sts=4 et:
 # APBS -- Adaptive Poisson-Boltzmann Solver
 #
 #  Nathan A. Baker (nathan.baker@pnnl.gov)
@@ -7,7 +7,7 @@
 #
 #  Additional contributing authors listed in the code documentation.
 #
-# Copyright (c) 2010-2015 Battelle Memorial Institute. Developed at the
+# Copyright (c) 2010-2016 Battelle Memorial Institute. Developed at the
 # Pacific Northwest National Laboratory, operated by Battelle Memorial
 # Institute, Pacific Northwest Division for the U.S. Department of Energy.
 #
@@ -50,76 +50,76 @@ __author__ = 'Keith T. Star <keith@pnnl.gov>'
 # Just a few quick assertions to make sure that we are loading
 # the PDBx/mmCIF schema.
 def test_that_TM_loads_pdbx_mmcif():
-	tm = TypeManager()
-	at_schema = tm.get_schema('atom_type')
-	assert_equal(type(at_schema), dict)
-	assert_equal(at_schema['type'], 'object')
-	assert_equal(at_schema['required'], ['symbol'])
-	assert_equal(at_schema['properties']['symbol'],
-				 {'type': 'string'})
+    tm = TypeManager()
+    at_schema = tm.get_schema('atom_type')
+    assert_equal(type(at_schema), dict)
+    assert_equal(at_schema['type'], 'object')
+    assert_equal(at_schema['required'], ['symbol'])
+    assert_equal(at_schema['properties']['symbol'],
+                 {'type': 'string'})
 
 
 def test_value_creation_with_kwargs():
-	tm = TypeManager()
-	at = tm.new_atom_type(symbol='C', radius_bond=1.1)
-	assert_equal(at, {'atom_type': {'symbol': 'C', 'radius_bond': 1.1}})
+    tm = TypeManager()
+    at = tm.new_atom_type(symbol='C', radius_bond=1.1)
+    assert_equal(at, {'atom_type': {'symbol': 'C', 'radius_bond': 1.1}})
 
 
 def test_value_creation_with_dict():
-	tm = TypeManager()
-	at = tm.new_atom_type({'symbol': 'C', 'radius_bond': 1.1})
-	assert_equal(at, {'atom_type': {'symbol': 'C', 'radius_bond': 1.1}})
+    tm = TypeManager()
+    at = tm.new_atom_type({'symbol': 'C', 'radius_bond': 1.1})
+    assert_equal(at, {'atom_type': {'symbol': 'C', 'radius_bond': 1.1}})
 
 
 @raises(AttributeError)
 def test_no_such_type():
-	tm = TypeManager()
-	tm.new_fubar()
+    tm = TypeManager()
+    tm.new_fubar()
 
 
 @raises(ValidationError)
 def test_validation_missing_required():
-	tm = TypeManager()
-	at = tm.new_atom_type()
+    tm = TypeManager()
+    at = tm.new_atom_type()
 
 
 @raises(ValidationError)
 def test_validation_extra_data():
-	tm = TypeManager()
-	at = tm.new_atom_type(radius=1.10)
+    tm = TypeManager()
+    at = tm.new_atom_type(radius=1.10)
 
 
 @raises(ValidationError)
 def test_validation_wrong_property_type():
-	tm = TypeManager()
-	at = tm.new_atom_type(symbol=7)
+    tm = TypeManager()
+    at = tm.new_atom_type(symbol=7)
 
 
 def test_new_type():
-	tm = TypeManager()
-	tm.define_type('apbs_type',
-				   {
-					'width': {'type': 'number'},
-					'height': {'type': 'integer'},
-					'widgets': {
-						'type': 'array',
-						'items': {'$ref': '#/definitions/atom_type'}
-					}
-				   })
-	at = tm.new_apbs_type(width=1.24, height=7, widgets=[
-						  {'symbol': 'C'},
-						  {'symbol': 'O'}])
+    tm = TypeManager()
+    tm.define_type('apbs_type',
+                   {
+                    'width': {'type': 'number'},
+                    'height': {'type': 'integer'},
+                    'widgets': {
+                        'type': 'array',
+                        'items': {'$ref': '#/definitions/atom_type'}
+                    }
+                   })
+    at = tm.new_apbs_type(width=1.24, height=7, widgets=[
+                          {'symbol': 'C'},
+                          {'symbol': 'O'}])
 
-	value = at['apbs_type']
-	assert_equal(value['width'], 1.24)
-	assert_equal(value['height'], 7)
-	assert_equal(value['widgets'][0], {'symbol': 'C'})
-	assert_equal(value['widgets'][1], {'symbol': 'O'})
+    value = at['apbs_type']
+    assert_equal(value['width'], 1.24)
+    assert_equal(value['height'], 7)
+    assert_equal(value['widgets'][0], {'symbol': 'C'})
+    assert_equal(value['widgets'][1], {'symbol': 'O'})
 
 
 def test_extend_type():
-	tm = TypeManager()
-	tm.define_type('apbs_atom_type',
-				   {'radius': {'type': 'number'}},
-				   base='atom_type')
-	at = tm.new_apbs_atom_type(symbol='O', radius=1.18)
+    tm = TypeManager()
+    tm.define_type('apbs_atom_type',
+                   {'radius': {'type': 'number'}},
+                   base='atom_type')
+    at = tm.new_apbs_atom_type(symbol='O', radius=1.18)

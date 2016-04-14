@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*- {{{
-# vim: set fenc=utf-8 ft=python ff=unix noet sts=0 sw=4 ts=4 :
+# vim: set fenc=utf-8 ft=python ff=unix sw=4 ts=4 sts=4 et:
 # APBS -- Adaptive Poisson-Boltzmann Solver
 #
 #  Nathan A. Baker (nathan.baker@pnnl.gov)
@@ -7,7 +7,7 @@
 #
 #  Additional contributing authors listed in the code documentation.
 #
-# Copyright (c) 2010-2015 Battelle Memorial Institute. Developed at the
+# Copyright (c) 2010-2016 Battelle Memorial Institute. Developed at the
 # Pacific Northwest National Laboratory, operated by Battelle Memorial
 # Institute, Pacific Northwest Division for the U.S. Department of Energy.
 #
@@ -48,64 +48,64 @@ __author__ = 'Keith T. Star <keith@pnnl.gov>'
 _log = logging.getLogger()
 
 class SillyServer(BasePlugin):
-	'''A web server example plug-in
-	'''
-	def __init__(self, *args, host='127.0.0.1', port=5150):
-		super().__init__(*args)
-		self._host = host
-		self._port = port
+    '''A web server example plug-in
+    '''
+    def __init__(self, *args, host='127.0.0.1', port=5150):
+        super().__init__(*args)
+        self._host = host
+        self._port = port
 
-		self._connections = {}
+        self._connections = {}
 
-		_log.info("SillyServer started on {} {}.".format(host, port))
-
-
-	@classmethod
-	def script_name(cls):
-		return "silly_server"
+        _log.info("SillyServer started on {} {}.".format(host, port))
 
 
-	@classmethod
-	def sinks(cls):
-		return []
+    @classmethod
+    def script_name(cls):
+        return "silly_server"
 
 
-	@classmethod
-	def sources(cls):
-		return []
+    @classmethod
+    def sinks(cls):
+        return []
 
 
-	@asyncio.coroutine
-	def run(self):
-		'''Start the server
-		In this context, we want to have a long running server, rather than
-		processing some finite amount of data.  To get this to work we need to
-		create a Server and return it.
-		'''
-		self._server = yield from asyncio.start_server(self._connection,
-			self._host,	self._port,	loop=self.runner._loop)
-		return self._server
+    @classmethod
+    def sources(cls):
+        return []
 
 
-	def _connection(self, reader, writer):
-		print("We have a connection!!")
-		task = asyncio.Task(self._connection_handler(reader, writer))
-		self._connections[task] = (reader, writer)
+    @asyncio.coroutine
+    def run(self):
+        '''Start the server
+        In this context, we want to have a long running server, rather than
+        processing some finite amount of data.  To get this to work we need to
+        create a Server and return it.
+        '''
+        self._server = yield from asyncio.start_server(self._connection,
+            self._host, self._port, loop=self.runner._loop)
+        return self._server
 
-		def connection_done(task):
-			print("Connection is gone. :(")
-			del self._connections[task]
 
-		task.add_done_callback(connection_done)
+    def _connection(self, reader, writer):
+        print("We have a connection!!")
+        task = asyncio.Task(self._connection_handler(reader, writer))
+        self._connections[task] = (reader, writer)
+
+        def connection_done(task):
+            print("Connection is gone. :(")
+            del self._connections[task]
+
+        task.add_done_callback(connection_done)
 
 
-	@asyncio.coroutine
-	def _connection_handler(self, reader, writer):
-		while True:
-			data = (yield from reader.readline()).decode('utf-8')
-			if not data:
-				break
+    @asyncio.coroutine
+    def _connection_handler(self, reader, writer):
+        while True:
+            data = (yield from reader.readline()).decode('utf-8')
+            if not data:
+                break
 
-			print("client sent: {}".format(data))
+            print("client sent: {}".format(data))
 
-			yield from writer.drain()
+            yield from writer.drain()

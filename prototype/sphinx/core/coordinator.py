@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*- {{{
-# vim: set fenc=utf-8 ft=python ff=unix noet sts=0 sw=4 ts=4 :
+# vim: set fenc=utf-8 ft=python ff=unix sw=4 ts=4 sts=4 et:
 # APBS -- Adaptive Poisson-Boltzmann Solver
 #
 #  Nathan A. Baker (nathan.baker@pnnl.gov)
@@ -7,7 +7,7 @@
 #
 #  Additional contributing authors listed in the code documentation.
 #
-# Copyright (c) 2010-2015 Battelle Memorial Institute. Developed at the
+# Copyright (c) 2010-2016 Battelle Memorial Institute. Developed at the
 # Pacific Northwest National Laboratory, operated by Battelle Memorial
 # Institute, Pacific Northwest Division for the U.S. Department of Energy.
 #
@@ -55,104 +55,104 @@ __author__ = 'Keith T. Star <keith@pnnl.gov>'
 _log = logging.getLogger()
 
 class Coordinator:
-	'''Sphinx Main Runner-thing
-	'''
-	def __init__(self, plugins):
-		self._plugin_dir = plugins
-		self._plugins = {}
-		self._plugin_funcs = {}
-		self._databus = None
-		self._loop = None
-		self._tasks = []
+    '''Sphinx Main Runner-thing
+    '''
+    def __init__(self, plugins):
+        self._plugin_dir = plugins
+        self._plugins = {}
+        self._plugin_funcs = {}
+        self._databus = None
+        self._loop = None
+        self._tasks = []
 
 
-	def start(self, cmd_file, cmd_args):
-		'''Main entry point -- post constructor.
-		cmd_file is the command file to process
-		cmd_args are the arguments for the cmd file
-		'''
-		# Get a handle to our event loop.
-		if os.name == 'nt':
-			self._loop = asyncio.ProactorEventLoop()
-			asyncio.set_event_loop(loop)
-		else:
-			self._loop = asyncio.get_event_loop()
+    def start(self, cmd_file, cmd_args):
+        '''Main entry point -- post constructor.
+        cmd_file is the command file to process
+        cmd_args are the arguments for the cmd file
+        '''
+        # Get a handle to our event loop.
+        if os.name == 'nt':
+            self._loop = asyncio.ProactorEventLoop()
+            asyncio.set_event_loop(loop)
+        else:
+            self._loop = asyncio.get_event_loop()
 
-		self._executor = ProcessPoolExecutor()
-		self._loop.set_default_executor(self._executor)
+        self._executor = ProcessPoolExecutor()
+        self._loop.set_default_executor(self._executor)
 
-		self._databus = SDBController()
-		self._load_plugins()
+        self._databus = SDBController()
+        self._load_plugins()
 
-		print("Ctrl-C to escape...")
+        print("Ctrl-C to escape...")
 
-		locals = dict([(p[0], p[1]) for p in [x.split('=') for x in cmd_args]])
+        locals = dict([(p[0], p[1]) for p in [x.split('=') for x in cmd_args]])
 
-		try:
-			# Load and process the command file.  It's just Python.
-			_log.info("Reading command file.")
-			with open(cmd_file) as cf:
-				code = compile(cf.read(), cmd_file, 'exec')
-				exec(code, self._plugin_funcs, {'params':locals})
+        try:
+            # Load and process the command file.  It's just Python.
+            _log.info("Reading command file.")
+            with open(cmd_file) as cf:
+                code = compile(cf.read(), cmd_file, 'exec')
+                exec(code, self._plugin_funcs, {'params':locals})
 
-			_log.info("Starting the run loop.")
-			self._loop.run_until_complete(asyncio.wait(self._tasks))
+            _log.info("Starting the run loop.")
+            self._loop.run_until_complete(asyncio.wait(self._tasks))
 
-		except KeyboardInterrupt:
-			pass
+        except KeyboardInterrupt:
+            pass
 
-		except Exception:
-			print("Oops -- something bad happened.  Check io.mc for details")
+        except Exception:
+            print("Oops -- something bad happened.  Check io.mc for details")
 
-		finally:
-			self.stop()
-
-
-	def stop(self):
-		self._executor.shutdown()
-		self._loop.stop()
-		self._loop.close()
-		_log.info("The run loop is shut down.")
+        finally:
+            self.stop()
 
 
-	@asyncio.coroutine
-	def run_as_process(self, func, args):
-		try:
-			results = yield from self._loop.run_in_executor(self._executor, func,
-					args)
-		except:
-			_log.info("We encountered an exception.  Goodbye.")
-			self.stop()
-
-		return results
+    def stop(self):
+        self._executor.shutdown()
+        self._loop.stop()
+        self._loop.close()
+        _log.info("The run loop is shut down.")
 
 
-	def create_task(self, func):
-		task = self._loop.create_task(func)
+    @asyncio.coroutine
+    def run_as_process(self, func, args):
+        try:
+            results = yield from self._loop.run_in_executor(self._executor, func,
+                    args)
+        except:
+            _log.info("We encountered an exception.  Goodbye.")
+            self.stop()
 
-		self._tasks.append(task)
-
-		return task
+        return results
 
 
-	def _load_plugins(self):
-		'''Load the plugins
-		This implementation is näive and just loads everything.  We can clearly
-		do better.
-		'''
-		print(os.getcwd())
-		for file in os.listdir(self._plugin_dir):
-			if os.path.isdir(os.path.join(self._plugin_dir, file)):
-				# For now I'm thinking that we'll require the plug-in author to
-				# put their plug-in in a file called plugin.py, inside of a
-				# module that is named the same as their class implementation in
-				# the plugin.py file.
-				plugin = getattr(import_module(self._plugin_dir + '.' + file +
-					'.plugin'), file)
-				self._plugins[file] = plugin
-				self._databus.add_plugin(plugin)
+    def create_task(self, func):
+        task = self._loop.create_task(func)
 
-				# TODO: This is pretty lame, but it's a quick and dirty way to
-				# see how this script thing is going to work out.
-				self._plugin_funcs[plugin.script_name()] = partial(plugin,
-					runner = self, plugins = self._plugin_funcs)
+        self._tasks.append(task)
+
+        return task
+
+
+    def _load_plugins(self):
+        '''Load the plugins
+        This implementation is näive and just loads everything.  We can clearly
+        do better.
+        '''
+        print(os.getcwd())
+        for file in os.listdir(self._plugin_dir):
+            if os.path.isdir(os.path.join(self._plugin_dir, file)):
+                # For now I'm thinking that we'll require the plug-in author to
+                # put their plug-in in a file called plugin.py, inside of a
+                # module that is named the same as their class implementation in
+                # the plugin.py file.
+                plugin = getattr(import_module(self._plugin_dir + '.' + file +
+                    '.plugin'), file)
+                self._plugins[file] = plugin
+                self._databus.add_plugin(plugin)
+
+                # TODO: This is pretty lame, but it's a quick and dirty way to
+                # see how this script thing is going to work out.
+                self._plugin_funcs[plugin.script_name()] = partial(plugin,
+                    runner = self, plugins = self._plugin_funcs)

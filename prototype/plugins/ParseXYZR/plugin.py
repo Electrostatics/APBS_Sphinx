@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*- {{{
-# vim: set fenc=utf-8 ft=python ff=unix noet sts=0 sw=4 ts=4 :
+# vim: set fenc=utf-8 ft=python ff=unix sw=4 ts=4 sts=4 et:
 # APBS -- Adaptive Poisson-Boltzmann Solver
 #
 #  Nathan A. Baker (nathan.baker@pnnl.gov)
@@ -7,7 +7,7 @@
 #
 #  Additional contributing authors listed in the code documentation.
 #
-# Copyright (c) 2010-2015 Battelle Memorial Institute. Developed at the
+# Copyright (c) 2010-2016 Battelle Memorial Institute. Developed at the
 # Pacific Northwest National Laboratory, operated by Battelle Memorial
 # Institute, Pacific Northwest Division for the U.S. Department of Energy.
 #
@@ -48,59 +48,59 @@ __author__ = 'Keith T. Star <keith@pnnl.gov>'
 _log = logging.getLogger()
 
 class ParseXYZR(BasePlugin):
-	'''Plugin for parsing "xyzr" files.
-	This plugin parses files that contain atomic data where each row is an
-	atom.  The first three columns are it's X, Y, and Z positions in space,
-	the fourth column is it's radius, and the fifth column is it's charge.
-	'''
-	def __init__(self, **kwargs):
-		super().__init__(**kwargs)
-		_log.info("ParseXYZR plug-in initialized.")
+    '''Plugin for parsing "xyzr" files.
+    This plugin parses files that contain atomic data where each row is an
+    atom.  The first three columns are it's X, Y, and Z positions in space,
+    the fourth column is it's radius, and the fifth column is it's charge.
+    '''
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        _log.info("ParseXYZR plug-in initialized.")
 
 
-	@classmethod
-	def script_name(cls):
-		return "parse_xyzr"
+    @classmethod
+    def script_name(cls):
+        return "parse_xyzr"
 
 
-	@classmethod
-	def sinks(cls):
-		return [{'Type': 'file/.in'}]
+    @classmethod
+    def sinks(cls):
+        return [{'Type': 'file/.in'}]
 
 
-	@classmethod
-	def sources(cls):
-		return [
-			{'Type': 'plug-in/runner', }
-		]
+    @classmethod
+    def sources(cls):
+        return [
+            {'Type': 'plug-in/runner', }
+        ]
 
 
-	@asyncio.coroutine
-	def run(self):
-		seq = 1
-		while True:
-			data = yield from self.read_data()
-			if data:
-				x, y, z, r, c = data.split()
-				record = self._tm.new_apbs_atom(
-						id='?',
-						label_alt_id='?',
-						label_asym_id='?',
-						label_atom_id='?',
-						label_comp_id='?',
-						label_entity_id='?',
-						label_seq_id = seq,
-						type_symbol = '?',
-						auth_asym_id = '?',
-						Cartn_x = float(x),
-						Cartn_y = float(y),
-						Cartn_z = float(z),
-						radius=float(r),
-						charge=float(c))
-				seq += 1
+    @asyncio.coroutine
+    def run(self):
+        seq = 1
+        while True:
+            data = yield from self.read_data()
+            if data:
+                x, y, z, r, c = data.split()
+                record = self._tm.new_apbs_atom(
+                        id='?',
+                        label_alt_id='?',
+                        label_asym_id='?',
+                        label_atom_id='?',
+                        label_comp_id='?',
+                        label_entity_id='?',
+                        label_seq_id = seq,
+                        type_symbol = '?',
+                        auth_asym_id = '?',
+                        Cartn_x = float(x),
+                        Cartn_y = float(y),
+                        Cartn_z = float(z),
+                        radius=float(r),
+                        charge=float(c))
+                seq += 1
 
-				yield from self.publish(record)
-			else:
-				break
+                yield from self.publish(record)
+            else:
+                break
 
-		yield from self.done()
+        yield from self.done()

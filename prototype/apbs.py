@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*- {{{
-# vim: set fenc=utf-8 ft=python ff=unix noet sts=0 sw=4 ts=4 : :
+# vim: set fenc=utf-8 ft=python ff=unix sw=4 ts=4 sts=4 et:
+
 # APBS -- Adaptive Poisson-Boltzmann Solver
 #
 #  Nathan A. Baker (nathan.baker@pnnl.gov)
@@ -8,7 +9,7 @@
 #
 #  Additional contributing authors listed in the code documentation.
 #
-# Copyright (c) 2010-2015 Battelle Memorial Institute. Developed at the
+# Copyright (c) 2010-2016 Battelle Memorial Institute. Developed at the
 # Pacific Northwest National Laboratory, operated by Battelle Memorial
 # Institute, Pacific Northwest Division for the U.S. Department of Energy.
 #
@@ -54,49 +55,49 @@ __author__ = 'Keith T. Star <keith@pnnl.gov>'
 # I'm not at all convinced that we should continue with 'io.mc' and neither am I
 # convinced that we shouldn't.
 logging.basicConfig(filename='io.mc', level=logging.INFO,
-	format='%(asctime)s %(message)s')
+    format='%(asctime)s %(message)s')
 
 # TODO: log errors to stderr.
 _log = logging.getLogger(os.path.basename(sys.argv[0]))
 
 
 def parse_args():
-	'''Parse command line arguments
-	For now I'm not terribly concerned about dealing with a bunch of different
-	options.  In fact, I think it would be best to keep them down in any case
-	and relegate options to the command files.
-	'''
-	parser = argparse.ArgumentParser(description="APBS (sphinx)")
-	parser.add_argument('command_file', metavar='cmd_file', nargs=1,
-		help="file containing APBS commands, followed by it's arguments")
-	parser.add_argument('cmd_args', nargs=argparse.REMAINDER)
-	args = parser.parse_args()
+    '''Parse command line arguments
+    For now I'm not terribly concerned about dealing with a bunch of different
+    options.  In fact, I think it would be best to keep them down in any case
+    and relegate options to the command files.
+    '''
+    parser = argparse.ArgumentParser(description="APBS (sphinx)")
+    parser.add_argument('command_file', metavar='cmd_file', nargs=1,
+        help="file containing APBS commands, followed by it's arguments")
+    parser.add_argument('cmd_args', nargs=argparse.REMAINDER)
+    args = parser.parse_args()
 
-	cmd = args.command_file[0]
-	cmd_args = args.cmd_args
-	_log.info('Command file: {}, args: {}'.format(cmd, cmd_args))
+    cmd = args.command_file[0]
+    cmd_args = args.cmd_args
+    _log.info('Command file: {}, args: {}'.format(cmd, cmd_args))
 
-	return cmd, cmd_args
+    return cmd, cmd_args
 
 
 def main():
-	try:
-		_log.info('Hello world, from APBS (sphinx).')
+    try:
+        _log.info('Hello world, from APBS (sphinx).')
 
-		# Get files from the command line
-		cmd, args = parse_args()
+        # Get files from the command line
+        cmd, args = parse_args()
 
-		# Create, and start the "Coordinator"
-		coordinator = Coordinator(PLUGIN_DIR)
-		coordinator.start(cmd, args)
+        # Create, and start the "Coordinator"
+        coordinator = Coordinator(PLUGIN_DIR)
+        coordinator.start(cmd, args)
 
-	except Exception as e:
-		coordinator.stop()
-		_log.exception('Unhandled exception:')
+    except Exception as e:
+        coordinator.stop()
+        _log.exception('Unhandled exception:')
 
 if __name__ == '__main__':
-	# Script entry point
-	try:
-		sys.exit(main())
-	except KeyboardInterrupt:
-		pass
+    # Script entry point
+    try:
+        sys.exit(main())
+    except KeyboardInterrupt:
+        pass

@@ -8,9 +8,9 @@
 #  send(input).run_geoflow
 
 geo_output = (
-	read_file(params['infile'])
-		.parse_xyzr()
-		.geoflow()
+    read_file(params['infile'])
+        .parse_xyzr()
+        .geoflow()
 )
 
 geo_output.write_file(params['outfile'])

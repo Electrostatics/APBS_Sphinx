@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*- {{{
-# vim: set fenc=utf-8 ft=python ff=unix noet sts=0 sw=4 ts=4 :
+# vim: set fenc=utf-8 ft=python ff=unix sw=4 ts=4 sts=4 et:
 # APBS -- Adaptive Poisson-Boltzmann Solver
 #
 #  Nathan A. Baker (nathan.baker@pnnl.gov)
@@ -7,7 +7,7 @@
 #
 #  Additional contributing authors listed in the code documentation.
 #
-# Copyright (c) 2010-2015 Battelle Memorial Institute. Developed at the
+# Copyright (c) 2010-2016 Battelle Memorial Institute. Developed at the
 # Pacific Northwest National Laboratory, operated by Battelle Memorial
 # Institute, Pacific Northwest Division for the U.S. Department of Energy.
 #
@@ -49,119 +49,119 @@ __all__ = ['BasePlugin']
 __author__ = 'Keith T. Star <keith@pnnl.gov>'
 
 class BasePlugin(metaclass=ABCMeta):
-	'''Core plug-in functionality
-	A Sphinx plug-in needs to provide a minimim set of services in order to be
-	useful.  Those are defined here, with default implementations where it
-	makes sense.
-	'''
+    '''Core plug-in functionality
+    A Sphinx plug-in needs to provide a minimim set of services in order to be
+    useful.  Those are defined here, with default implementations where it
+    makes sense.
+    '''
 
-	# This is a handle to the data bus.  It's set when we are registered.
-	_databus = None
+    # This is a handle to the data bus.  It's set when we are registered.
+    _databus = None
 
-	# Type manager handle
-	_tm = None
+    # Type manager handle
+    _tm = None
 
-	def __init__(self, runner, plugins, source = None):
-		'''Ctor
-		This method _must_ be called with the event loop from which it will be
-		called in the future, e.g., asyncio.get_event_loop().
-		'''
-		self._sinks = []
+    def __init__(self, runner, plugins, source = None):
+        '''Ctor
+        This method _must_ be called with the event loop from which it will be
+        called in the future, e.g., asyncio.get_event_loop().
+        '''
+        self._sinks = []
 
-		# Retain a pointer to our source, and add ourself to it's list of sinks.
-		self._source = source
-		if source:
-			source._sinks.append(self)
+        # Retain a pointer to our source, and add ourself to it's list of sinks.
+        self._source = source
+        if source:
+            source._sinks.append(self)
 
-		# Producer/consumer queue
-		self._queue = Queue()
+        # Producer/consumer queue
+        self._queue = Queue()
 
-		self.runner = runner
-		self._plugins = plugins
+        self.runner = runner
+        self._plugins = plugins
 
-		# create_task schedules the execution of the coroutine "run", wrapped
-		# in a future.
-		self._task = self.runner.create_task(self.run())
-
-
-	def __getattr__(self, name):
-		'''Plugin Pipeline Bulding
-		This method is called when Python can't find a requested attribute. We
-		use it to create a new plugin instance to add to the pipeline.
-		'''
-		if name in self._plugins:
-			return partial(self._plugins[name], source = self)
-
-		else:
-			raise AttributeError
-
-	@coroutine
-	def publish(self, data):
-		'''Publish data
-		Called by a plugin to publish data to it's sinks.
-		'''
-		# Turn the data dict into a JSON string before sending it.  This may
-		# not make a lot of sense yet, but eventually serialization for
-		# transport will be essential.
-		for sink in self._sinks:
-			yield from sink._queue.put(json.dumps(data))
+        # create_task schedules the execution of the coroutine "run", wrapped
+        # in a future.
+        self._task = self.runner.create_task(self.run())
 
 
-	@coroutine
-	def read_data(self):
-		'''Read data from queue
-		Called by plugins to get data from their sources.
-		'''
-		data = yield from self._queue.get()
-		return json.loads(data)
+    def __getattr__(self, name):
+        '''Plugin Pipeline Bulding
+        This method is called when Python can't find a requested attribute. We
+        use it to create a new plugin instance to add to the pipeline.
+        '''
+        if name in self._plugins:
+            return partial(self._plugins[name], source = self)
+
+        else:
+            raise AttributeError
+
+    @coroutine
+    def publish(self, data):
+        '''Publish data
+        Called by a plugin to publish data to it's sinks.
+        '''
+        # Turn the data dict into a JSON string before sending it.  This may
+        # not make a lot of sense yet, but eventually serialization for
+        # transport will be essential.
+        for sink in self._sinks:
+            yield from sink._queue.put(json.dumps(data))
 
 
-	@coroutine
-	def done(self):
-		'''The plugin is finished
-		Called by a plugin to indicate to it's sinks that it has no more data.
-		'''
-		yield from self.publish(None)
+    @coroutine
+    def read_data(self):
+        '''Read data from queue
+        Called by plugins to get data from their sources.
+        '''
+        data = yield from self._queue.get()
+        return json.loads(data)
 
 
-	@classmethod
-	def sinks(cls):
-		'''Sink types
-		These are an array of types that we sink, i.e., read.
-		'''
-		return []
+    @coroutine
+    def done(self):
+        '''The plugin is finished
+        Called by a plugin to indicate to it's sinks that it has no more data.
+        '''
+        yield from self.publish(None)
 
 
-	@classmethod
-	def sources(cls):
-		'''Source types
-		These are an array of types that we source, i.e., write.
-		'''
-		return []
+    @classmethod
+    def sinks(cls):
+        '''Sink types
+        These are an array of types that we sink, i.e., read.
+        '''
+        return []
 
 
-	@classmethod
-	def set_databus(cls, db):
-		'''A handler to the Semantic Databus
-		This gets set when the plug-in is registered.
-		'''
-		cls._databus = db
-		cls._tm = db._typemgr
+    @classmethod
+    def sources(cls):
+        '''Source types
+        These are an array of types that we source, i.e., write.
+        '''
+        return []
 
 
-	@classmethod
-	def script_name(cls):
-		'''Return the plug-in's script name.
-		The script name is how the plug-in is referred to by command scripts.
-		'''
-		pass
+    @classmethod
+    def set_databus(cls, db):
+        '''A handler to the Semantic Databus
+        This gets set when the plug-in is registered.
+        '''
+        cls._databus = db
+        cls._tm = db._typemgr
 
 
-	@abstractmethod
-	@coroutine
-	def run(self):
-		'''Our main method where work is done
-		This is the method that will be invoked when the plug-in needs to do
-		some work.
-		'''
-		pass
+    @classmethod
+    def script_name(cls):
+        '''Return the plug-in's script name.
+        The script name is how the plug-in is referred to by command scripts.
+        '''
+        pass
+
+
+    @abstractmethod
+    @coroutine
+    def run(self):
+        '''Our main method where work is done
+        This is the method that will be invoked when the plug-in needs to do
+        some work.
+        '''
+        pass

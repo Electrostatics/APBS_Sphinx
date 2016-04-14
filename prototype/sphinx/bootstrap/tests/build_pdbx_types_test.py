@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*- {{{
-# vim: set fenc=utf-8 ft=python ff=unix noet sts=0 sw=4 ts=4 :
+# vim: set fenc=utf-8 ft=python ff=unix sw=4 ts=4 sts=4 et:
+
 # APBS -- Adaptive Poisson-Boltzmann Solver
 #
 #  Nathan A. Baker (nathan.baker@pnnl.gov)
@@ -7,7 +8,7 @@
 #
 #  Additional contributing authors listed in the code documentation.
 #
-# Copyright (c) 2010-2015 Battelle Memorial Institute. Developed at the
+# Copyright (c) 2010-2016 Battelle Memorial Institute. Developed at the
 # Pacific Northwest National Laboratory, operated by Battelle Memorial
 # Institute, Pacific Northwest Division for the U.S. Department of Energy.
 #
@@ -50,61 +51,61 @@ __author__ = 'Keith T. Star <keith@pnnl.gov>'
 # Good Thing.
 
 def setup_schema():
-	global schema
+    global schema
 
-	with open('sphinx/databus/PDBxmmCIF.json') as f:
-		schema = json.loads(f.read())
+    with open('sphinx/databus/PDBxmmCIF.json') as f:
+        schema = json.loads(f.read())
 
-	# Add some properties to the schema so that we can actually test
-	# instantiations.
-	schema['properties']['atom_types'] = {
-		'type': 'array',
-		'items': {'$ref': '#/definitions/atom_type'}
-	}
-	schema['properties']['atom_sites'] = {
-		'type': 'array',
-		'items': {
-		'$ref': '#/definitions/atom_site'
-	}
+    # Add some properties to the schema so that we can actually test
+    # instantiations.
+    schema['properties']['atom_types'] = {
+        'type': 'array',
+        'items': {'$ref': '#/definitions/atom_type'}
+    }
+    schema['properties']['atom_sites'] = {
+        'type': 'array',
+        'items': {
+        '$ref': '#/definitions/atom_site'
+    }
 }
 
 
 @with_setup(setup_schema)
 def test_atom_types():
-	'''
-	Test that the generated schema will allow us to create instances of
-	atom_types.
-	'''
-	assert_is_none(validate({'atom_types': [{'symbol': 'C'}]}, schema))
-	assert_is_none(validate({'atom_types': [{'symbol': 'C',
-	                                         'radius_bond': 1.10}]}, schema))
-	assert_is_none(validate({'atom_types': [{'symbol': 'C'},
-	                                        {'symbol': 'N'}]}, schema))
+    '''
+    Test that the generated schema will allow us to create instances of
+    atom_types.
+    '''
+    assert_is_none(validate({'atom_types': [{'symbol': 'C'}]}, schema))
+    assert_is_none(validate({'atom_types': [{'symbol': 'C',
+                                             'radius_bond': 1.10}]}, schema))
+    assert_is_none(validate({'atom_types': [{'symbol': 'C'},
+                                            {'symbol': 'N'}]}, schema))
 
 
 @with_setup(setup_schema)
 @raises(ValidationError)
 def test_missing_required_attribute():
-	'''
-	This should throw an exception because 'symbol' is missing.
-	'''
-	validate({'atom_types': [{'radius_bond': 1.10}]}, schema)
+    '''
+    This should throw an exception because 'symbol' is missing.
+    '''
+    validate({'atom_types': [{'radius_bond': 1.10}]}, schema)
 
 
 @with_setup(setup_schema)
 @raises(ValidationError)
 def test_unexpected_attribute():
-	'''
-	This should throw an exception because 'foo' is not in the schema.
-	'''
-	validate({'atom_types': [{'symbol': 'C', 'foo': True}]}, schema)
+    '''
+    This should throw an exception because 'foo' is not in the schema.
+    '''
+    validate({'atom_types': [{'symbol': 'C', 'foo': True}]}, schema)
 
 
 @with_setup(setup_schema)
 @raises(ValidationError)
 def test_wrong_attribute_type():
-	'''
-	This should throw an exception because 'symbol' needs be a string.
-	'''
-	validate({'atom_types': [{'symbol': 1}]}, schema)
+    '''
+    This should throw an exception because 'symbol' needs be a string.
+    '''
+    validate({'atom_types': [{'symbol': 1}]}, schema)
 

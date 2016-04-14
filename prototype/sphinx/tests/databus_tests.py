@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*- {{{
-# vim: set fenc=utf-8 ft=python ff=unix noet sts=0 sw=4 ts=4 :
+# vim: set fenc=utf-8 ft=python ff=unix sw=4 ts=4 sts=4 et:
 # APBS -- Adaptive Poisson-Boltzmann Solver
 #
 #  Nathan A. Baker (nathan.baker@pnnl.gov)
@@ -7,7 +7,7 @@
 #
 #  Additional contributing authors listed in the code documentation.
 #
-# Copyright (c) 2010-2015 Battelle Memorial Institute. Developed at the
+# Copyright (c) 2010-2016 Battelle Memorial Institute. Developed at the
 # Pacific Northwest National Laboratory, operated by Battelle Memorial
 # Institute, Pacific Northwest Division for the U.S. Department of Energy.
 #
@@ -46,93 +46,93 @@ from sphinx.plugin import BasePlugin
 __author__ = 'Keith T. Star <keith@pnnl.gov>'
 
 def setup_plugins():
-	global databus
+    global databus
 
-	databus = SDBController()
-	databus.add_plugin(TestPlugin)
-	databus.add_plugin(SymmetricTestPlugin)
-	databus.add_plugin(DuplicateTestPlugin)
+    databus = SDBController()
+    databus.add_plugin(TestPlugin)
+    databus.add_plugin(SymmetricTestPlugin)
+    databus.add_plugin(DuplicateTestPlugin)
 
 
 @with_setup(setup_plugins)
 def test_add_plugin():
-	# Test that the sources are properly captured.
-	foo_sources = databus.sources_for({'Type': 'file/.foo'})
-	assert_equal(2, len(foo_sources))
-	assert_in(TestPlugin, foo_sources)
-	assert_in(DuplicateTestPlugin, foo_sources)
+    # Test that the sources are properly captured.
+    foo_sources = databus.sources_for({'Type': 'file/.foo'})
+    assert_equal(2, len(foo_sources))
+    assert_in(TestPlugin, foo_sources)
+    assert_in(DuplicateTestPlugin, foo_sources)
 
-	bar_sources = databus.sources_for({'Type': 'bar'})
-	assert_equal(1, len(bar_sources))
-	assert_in(SymmetricTestPlugin, bar_sources)
+    bar_sources = databus.sources_for({'Type': 'bar'})
+    assert_equal(1, len(bar_sources))
+    assert_in(SymmetricTestPlugin, bar_sources)
 
-	baz_sources = databus.sources_for({'Type': 'baz'})
-	assert_equal(1, len(baz_sources))
-	assert_in(SymmetricTestPlugin, baz_sources)
+    baz_sources = databus.sources_for({'Type': 'baz'})
+    assert_equal(1, len(baz_sources))
+    assert_in(SymmetricTestPlugin, baz_sources)
 
-	# Test that the sinks are properly captured.
-	foo_sinks = databus.sinks_for({'Type': 'file/.foo'})
-	assert_equal(1, len(foo_sinks))
-	assert_in(SymmetricTestPlugin, foo_sinks)
+    # Test that the sinks are properly captured.
+    foo_sinks = databus.sinks_for({'Type': 'file/.foo'})
+    assert_equal(1, len(foo_sinks))
+    assert_in(SymmetricTestPlugin, foo_sinks)
 
-	bar_sinks = databus.sinks_for({'Type': 'bar'})
-	assert_equal(2, len(bar_sinks))
-	assert_in(TestPlugin, bar_sinks)
-	assert_in(DuplicateTestPlugin, bar_sinks)
+    bar_sinks = databus.sinks_for({'Type': 'bar'})
+    assert_equal(2, len(bar_sinks))
+    assert_in(TestPlugin, bar_sinks)
+    assert_in(DuplicateTestPlugin, bar_sinks)
 
-	baz_sinks = databus.sinks_for({'Type': 'baz'})
-	assert_equal(2, len(baz_sinks))
-	assert_in(TestPlugin, baz_sinks)
-	assert_in(DuplicateTestPlugin, baz_sinks)
+    baz_sinks = databus.sinks_for({'Type': 'baz'})
+    assert_equal(2, len(baz_sinks))
+    assert_in(TestPlugin, baz_sinks)
+    assert_in(DuplicateTestPlugin, baz_sinks)
 
 
 class TestPlugin(BasePlugin):
-	'''Super simple plugin that has sources and sinks
-	'''
-	def __init__(self):
-		super().__init__()
+    '''Super simple plugin that has sources and sinks
+    '''
+    def __init__(self):
+        super().__init__()
 
-	@classmethod
-	def sinks(cls):
-		return [{'Type': 'bar'}, {'Type': 'baz'}]
+    @classmethod
+    def sinks(cls):
+        return [{'Type': 'bar'}, {'Type': 'baz'}]
 
-	@classmethod
-	def sources(cls):
-		return [{'Type': 'file/.foo'}]
+    @classmethod
+    def sources(cls):
+        return [{'Type': 'file/.foo'}]
 
-	def run(self):
-		pass
+    def run(self):
+        pass
 
 class SymmetricTestPlugin(BasePlugin):
-	'''Super simple plugin that is symmetric to TestPlugin
-	'''
-	def __init__(self):
-		super().__init__()
+    '''Super simple plugin that is symmetric to TestPlugin
+    '''
+    def __init__(self):
+        super().__init__()
 
-	@classmethod
-	def sinks(cls):
-		return [{'Type': 'file/.foo'}]
+    @classmethod
+    def sinks(cls):
+        return [{'Type': 'file/.foo'}]
 
-	@classmethod
-	def sources(cls):
-		return [{'Type': 'bar'}, {'Type': 'baz'}]
+    @classmethod
+    def sources(cls):
+        return [{'Type': 'bar'}, {'Type': 'baz'}]
 
-	def run(self):
-		pass
+    def run(self):
+        pass
 
 class DuplicateTestPlugin(BasePlugin):
-	'''Super simple plugin that is identical to TestPlugin
-	'''
-	def __init__(self):
-		super().__init__()
+    '''Super simple plugin that is identical to TestPlugin
+    '''
+    def __init__(self):
+        super().__init__()
 
-	@classmethod
-	def sinks(cls):
-		return [{'Type': 'bar'}, {'Type': 'baz'}]
+    @classmethod
+    def sinks(cls):
+        return [{'Type': 'bar'}, {'Type': 'baz'}]
 
-	@classmethod
-	def sources(cls):
-		return [{'Type': 'file/.foo'}]
+    @classmethod
+    def sources(cls):
+        return [{'Type': 'file/.foo'}]
 
-	def run(self):
-		pass
+    def run(self):
+        pass

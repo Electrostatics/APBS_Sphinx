@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*- {{{
-# vim: set fenc=utf-8 ft=python ff=unix noet sts=0 sw=4 ts=4 :
+# vim: set fenc=utf-8 ft=python ff=unix sw=4 ts=4 sts=4 et:
 # APBS -- Adaptive Poisson-Boltzmann Solver
 #
 #  Nathan A. Baker (nathan.baker@pnnl.gov)
@@ -7,7 +7,7 @@
 #
 #  Additional contributing authors listed in the code documentation.
 #
-# Copyright (c) 2010-2015 Battelle Memorial Institute. Developed at the
+# Copyright (c) 2010-2016 Battelle Memorial Institute. Developed at the
 # Pacific Northwest National Laboratory, operated by Battelle Memorial
 # Institute, Pacific Northwest Division for the U.S. Department of Energy.
 #
@@ -49,42 +49,42 @@ __author__ = 'Keith T. Star <keith@pnnl.gov>'
 _log = logging.getLogger()
 
 class WriteFile(BasePlugin):
-	'''Plugin for writing a file
-	This plugin takes whatever it's given and writes it to the file it was
-	initialized with.
-	'''
-	def __init__(self, file, **kwargs):
-		self._file = file
-		super().__init__(**kwargs)
-		_log.info("WriteFile plug-in initialized.")
+    '''Plugin for writing a file
+    This plugin takes whatever it's given and writes it to the file it was
+    initialized with.
+    '''
+    def __init__(self, file, **kwargs):
+        self._file = file
+        super().__init__(**kwargs)
+        _log.info("WriteFile plug-in initialized.")
 
 
-	@classmethod
-	def script_name(cls):
-		return "write_file"
+    @classmethod
+    def script_name(cls):
+        return "write_file"
 
 
-	@classmethod
-	def sinks(cls):
-		return [{'Type': 'file/.in'}]
+    @classmethod
+    def sinks(cls):
+        return [{'Type': 'file/.in'}]
 
 
-	@classmethod
-	def sources(cls):
-		return [
-			{'Type': 'plug-in/runner', }
-		]
+    @classmethod
+    def sources(cls):
+        return [
+            {'Type': 'plug-in/runner', }
+        ]
 
 
-	@asyncio.coroutine
-	def run(self):
-		with open(self._file, 'w') as file:
-			while True:
-				data = yield from self.read_data()
-				if data:
-					file.write(json.dumps(data, indent=2 * ' '))
-				else:
-					# End of input
-					break
+    @asyncio.coroutine
+    def run(self):
+        with open(self._file, 'w') as file:
+            while True:
+                data = yield from self.read_data()
+                if data:
+                    file.write(json.dumps(data, indent=2 * ' '))
+                else:
+                    # End of input
+                    break
 
-		_log.info("WriteFile: wrote {}.".format(self._file))
+        _log.info("WriteFile: wrote {}.".format(self._file))
