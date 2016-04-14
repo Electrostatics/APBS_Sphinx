@@ -9,7 +9,7 @@ The process is anything but automagic, and we hope to fix that before too much l
 ### Install Python Virtual Environment, install dependencies and generate JSON schema from PDBx/mmCIF star file
 1. `cd <sphinx_repo>/prototype`
 2. `python3 bootstrap.py`
-3. `source env/bin/activate`
+3. `source sphinx-env/bin/activate`
 
 ### Build the Geometric Flow plugin
 7. `cd <sphinx_repo>/prototype/plugins/Geoflow/src`
