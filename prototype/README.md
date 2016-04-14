@@ -21,7 +21,7 @@ The process is anything but automagic, and we hope to fix that before too much l
 *Check the README file in the Geoflow/src directory if building on Windows or OSX*
 
 ## Testing the Beast
-We are currently using Nose to run the unit tests.  From the `prototype` directory just run `nosetests`.  Note that you'll need the appropriate version for Python 3.  In my case (OS X using homebrew) I have to type `nosetests-3.4` in the `<sphinx_repo>/prototype` directory.
+We are currently using Nose to run the unit tests.  From the `prototype` directory just run `nosetests`.
 
 ## Running the Beast
 From `<sphinx_repo>/prototype` try this:
