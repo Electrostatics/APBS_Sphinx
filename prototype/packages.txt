@@ -4,3 +4,6 @@ jsonschema
 
 # Geoflow, and other C/C++ plugins
 cython
+
+# Testing
+nose
