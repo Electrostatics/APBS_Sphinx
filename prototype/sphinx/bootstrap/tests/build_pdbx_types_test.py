@@ -87,7 +87,8 @@ def test_atom_types():
 @raises(ValidationError)
 def test_missing_required_attribute():
     '''
-    This should throw an exception because 'symbol' is missing.
+    This should throw an exception because 'symbol' isn't specified in the
+    instance.
     '''
     validate({'atom_types': [{'radius_bond': 1.10}]}, schema)
 

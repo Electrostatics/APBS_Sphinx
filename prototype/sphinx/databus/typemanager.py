@@ -66,7 +66,8 @@ class TypeManager:
         with open(PDBx_mmCIF_SCHEMA) as f:
             self._schema = json.loads(f.read())
 
-        # Setup a regex for new_ method dispatching
+        # Setup a regex for "new_*" method dispatching.  What's "new_*" method
+        # dispatching you ask?  Check it out below in the __getattr__ method.
         self._method_regex = re.compile('new_(.*)')
 
     
@@ -75,6 +76,15 @@ class TypeManager:
     
     
     def __getattr__(self, name):
+        ''' Implement hook for new_* methods
+        Here we use the old __getattr__ trick to make it easy to create a new
+        instance of a type.  Say we have a type called "apbs_atom" (which we do),
+        and we'd like to create one.  Given an instance of a TypeManager, e.g.,
+        tm, this trick let's us call tm.new_apbs_atom() to create that instance
+        we want.
+        However, this is really only a hook to return a partially bound instance
+        of a _new_value function that actually does the hard work.
+        '''
         method = self._method_regex.match(name).group(1)
         if method in self._schema['properties']:
             return partial(self._new_value, method)
@@ -85,6 +95,11 @@ class TypeManager:
 
 
     def _new_value(self, method, value_dict=None, **kwargs):
+        ''' Actually implement the new_* methods
+        Nothing too tricky going on here.  We just create a valid instance of a
+        JSON schema value, either from a dictionary or kwargs.  Note that we
+        validate the value after we create it.
+        '''
         d = {method: {}}
         if value_dict and type(value_dict) == dict:
             d[method] = value_dict
