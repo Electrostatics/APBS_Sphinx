@@ -117,6 +117,7 @@ def gen_schema(pdbx, uri):
     defs = schema['definitions']
     main_props = schema['properties']
 
+    prop_count = 0
     for cat in pdbx['cats']:
         '''
         Create schema definitions for each category.
@@ -130,6 +131,7 @@ def gen_schema(pdbx, uri):
         # Add each category to the properties of the schema so that each may
         # be instantiated, and validated.
         main_props[cat] = {'$ref': '#/definitions/{}'.format(cat)}
+        prop_count += 1
 
     for id, item in pdbx['items'].items():
         '''
@@ -150,6 +152,8 @@ def gen_schema(pdbx, uri):
         if item['required']:
             defs[cat]['required'].append(item_id)
 
+    print("Imported {} JSON properties.".format(prop_count))
+    
     return json.dumps(schema, sort_keys=True, indent=2 * ' ')
 
 
@@ -201,7 +205,7 @@ def load_schema(data):
             pdbx_dict['items'][name] = item_entry
 
         else:
-            print('found an unknown/unused block of type', block.getName())
+            _log.info("found an unknown/unused block of type {}".format(block.getName()))
 
     return pdbx_dict
 

@@ -40,4 +40,6 @@
 #}}}
 
 from sphinx.bootstrap import generate_types
+
+print("Building JSON Schema...")
 generate_types()
