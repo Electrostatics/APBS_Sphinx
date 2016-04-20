@@ -123,9 +123,11 @@ class TypeManager:
         Allow for new types of values to be created and inserted into the
         pipeline.
         '''
-        #TODO: perhaps create a self._user_schema to hold these?
-        #TODO: allow user to specify required properties
+        # TODO: perhaps create a self._user_schema to hold these?
+        # TODO: allow user to specify required properties
 
+        # TODO: Instead of copying stuff, look into using the "allOf" combining keyword,
+        # and a reference to the base.
         if base and base in self._schema['definitions']:
             new_type = self._schema['definitions'][name] = self._schema['definitions'][base]
             for k, v in properties.items():
