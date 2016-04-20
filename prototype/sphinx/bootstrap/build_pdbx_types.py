@@ -118,7 +118,7 @@ def gen_schema(pdbx, uri):
     main_props = schema['properties']
 
     prop_count = 0
-    for cat in pdbx['cats']:
+    for cat, desc in pdbx['cats'].items():
         '''
         Create schema definitions for each category.
         '''
@@ -126,6 +126,7 @@ def gen_schema(pdbx, uri):
             'type': 'object',
             'properties': {},
             'required': [],
+            'description': desc,
             'additionalProperties': False
         }
         # Add each category to the properties of the schema so that each may
@@ -162,12 +163,12 @@ def load_schema(data):
     It turns out that we can't properly process the information without having
     it loaded in memory first.  So that's what we do here.
     '''
-    pdbx_dict = {'cats': [], 'items': {}}
+    pdbx_dict = {'cats': {}, 'items': {}}
     for block in data:
         if block.exists('category'):
             get = partial(get_prop_from_cat, block)
             id = get('category', 'id')
-            pdbx_dict['cats'].append(id)
+            pdbx_dict['cats'][id] = get('category', 'description')
 
         elif block.exists('item'):
             # It's possible that 
@@ -185,12 +186,14 @@ def load_schema(data):
 
             item_type = get_item_type(get)
             required = get_required(get)
+            desc = get('item_description', 'description')
 
             item_entry = {
                 'item': item_id,
                 'category': cat_id,
                 'type': item_type,
                 'required': required,
+                'description': desc,
                 'refs': []
             }
             
