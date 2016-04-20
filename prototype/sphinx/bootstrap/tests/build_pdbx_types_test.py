@@ -64,9 +64,7 @@ def setup_schema():
     }
     schema['properties']['atom_sites'] = {
         'type': 'array',
-        'items': {
-        '$ref': '#/definitions/atom_site'
-    }
+        'items': {'$ref': '#/definitions/atom_site'}
 }
 
 
