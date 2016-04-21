@@ -168,7 +168,7 @@ def load_schema(data):
         if block.exists('category'):
             get = partial(get_prop_from_cat, block)
             id = get('category', 'id')
-            pdbx_dict['cats'][id] = get('category', 'description')
+            pdbx_dict['cats'][id] = get('category', 'description') or ""
 
         elif block.exists('item'):
             # It's possible that 
@@ -186,7 +186,7 @@ def load_schema(data):
 
             item_type = get_item_type(get)
             required = get_required(get)
-            desc = get('item_description', 'description')
+            desc = get_item_description(get)
 
             item_entry = {
                 'item': item_id,
@@ -234,6 +234,10 @@ def get_required(getter):
 def get_item_name(getter):
     name = getter('item', 'name')
     return name
+
+
+def get_item_description(getter):
+    return getter('item_description', 'description') or ""
 
 
 def get_prop_from_cat(block, cat_name, prop_name):
