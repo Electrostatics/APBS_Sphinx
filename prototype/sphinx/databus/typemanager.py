@@ -123,6 +123,20 @@ class TypeManager:
         Allow for new types of values to be created and inserted into the
         pipeline.
         '''
+        # TODO: It seems like we could do better than requiring that the user
+        # pass us a dict of properties, formatted as JSON Schema.  So rather
+        # than:
+        # {'radius': {'type': 'number'}},
+        #
+        # maybe we could do something like:
+        # {'radius': Type.NumberType},
+        #
+        # Where Type is an enumeration.
+        #
+        # That's just my first thought, so there's likely an even better notion
+        # to be found.
+
+        
         # TODO: perhaps create a self._user_schema to hold these?
         # TODO: allow user to specify required properties
 
