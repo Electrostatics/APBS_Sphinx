@@ -62,7 +62,10 @@ class SDBController:
         # place to do this.
         # For now, at least, we need to add radius and charge to the atom_site
         # in order for this to work with xyzr/geoflow.  We'll need to do this
-        # anyway, but it may not necessarily take this form.
+        # anyway, but it may not necessarily take this form.  More likely it'll
+        # be associated with the plugin.
+        # Also, I need to verify with Nathan that this is the correct place to
+        # store this type of information.
         self._typemgr.define_type('apbs_atom',
                 {
                     'radius': {'type': 'number'},
@@ -73,6 +76,7 @@ class SDBController:
 
     def add_plugin(self, plugin):
         '''Plug-ins are registered here
+
         In order to use a plug-in with the databus it must be registered with
         the databus via this method.  Here we interrogate the plug-in for the
         types that it soures as well as sinks, and store that data with a
@@ -80,56 +84,35 @@ class SDBController:
         We also give the plug-in a reference to ourself so that it can request
         data.
         '''
+        # TODO: Maybe check that the plugin hasn't already been registered?
+        # Is this the correct place for that test?
+        
         _log.info('Registering plug-in "{}" '.format(plugin.__name__) +
             'with sources {} '.format(plugin.sources()) +
              'and sinks {}.'.format(plugin.sinks()))
         plugin.set_databus(self)
 
         for source in plugin.sources():
-            self._get_plugin_list(source, self._source_types).append(plugin)
+            if not source in self._source_types:
+                self._source_types[source] = []
+            self._source_types[source].append(plugin)
 
         for sink in plugin.sinks():
-            self._get_plugin_list(sink, self._sink_types).append(plugin)
+            if not sink in self._sink_types:
+                self._sink_types[sink] = []
+            self._sink_types[sink].append(plugin)
 
 
     def sources_for(self, type):
         '''Get plug-ins that grok a source.
+
         Return a list (array) of plug-ins that source the type argument.
         '''
-        return self._get_plugin_list(type, self._source_types)
+        return self._source_types[type]
 
 
     def sinks_for(self, type):
         '''Get plug-ins that grok a sink
         '''
-        return self._get_plugin_list(type, self._sink_types)
+        return self._sink_types[type]
 
-
-    def _get_plugin_list(self, key, dict):
-        '''Return an array buried in a dictionary of semantic types
-        Our lists of sink and source handlers are indexed by a hierarchy of
-        keys where deeper levels are more specific instances of a type.
-        A type can increase specificity by using slashes.
-        '''
-        # TODO: We need more than just 'Type' to justify a dict.  It's also
-        # keeping us from doing something like:
-        #   {'Type': ['atom/elec', 'atom/apolar', 'text'] }
-        type = key['Type'].split('/')
-        first = type.pop(0)
-        try:
-            handlers = dict[first]
-        except KeyError:
-            dict[first] = handlers = {}
-
-        for t in type:
-            try:
-                handlers = handlers[t]
-            except KeyError:
-                handlers[t] = handlers = {}
-
-        try:
-            plugins = handlers['__plugins__']
-        except KeyError:
-            handlers['__plugins__'] = plugins = []
-
-        return plugins

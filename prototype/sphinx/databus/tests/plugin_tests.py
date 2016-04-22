@@ -49,41 +49,52 @@ def setup_plugins():
     global databus
 
     databus = SDBController()
+
+    # This is digging in the guts of the controller, and currently there's no
+    # interface to add types.  However, for a test, I don't think that this
+    # is too terrible.
+    databus._typemgr.define_type('type1', {'datum': { 'type': 'number'}})
+    databus._typemgr.define_type('type2', {'datum': { 'type': 'string'}})
+    databus._typemgr.define_type('type3', {'datum': { 'type': 'boolean'}})
+    
     databus.add_plugin(TestPlugin)
     databus.add_plugin(SymmetricTestPlugin)
-    databus.add_plugin(DuplicateTestPlugin)
+    databus.add_plugin(UberPlugin)
 
 
 @with_setup(setup_plugins)
 def test_add_plugin():
     # Test that the sources are properly captured.
-    foo_sources = databus.sources_for({'Type': 'file/.foo'})
-    assert_equal(2, len(foo_sources))
-    assert_in(TestPlugin, foo_sources)
-    assert_in(DuplicateTestPlugin, foo_sources)
+    type1_sources = databus.sources_for('type1')
+    assert_equal(2, len(type1_sources))
+    assert_in(TestPlugin, type1_sources)
+    assert_in(UberPlugin, type1_sources)
 
-    bar_sources = databus.sources_for({'Type': 'bar'})
-    assert_equal(1, len(bar_sources))
-    assert_in(SymmetricTestPlugin, bar_sources)
+    type2_sources = databus.sources_for('type2')
+    assert_equal(2, len(type2_sources))
+    assert_in(SymmetricTestPlugin, type2_sources)
+    assert_in(UberPlugin, type2_sources)
 
-    baz_sources = databus.sources_for({'Type': 'baz'})
-    assert_equal(1, len(baz_sources))
-    assert_in(SymmetricTestPlugin, baz_sources)
-
+    type3_sources = databus.sources_for('type3')
+    assert_equal(2, len(type3_sources))
+    assert_in(SymmetricTestPlugin, type3_sources)
+    assert_in(UberPlugin, type3_sources)
+    
     # Test that the sinks are properly captured.
-    foo_sinks = databus.sinks_for({'Type': 'file/.foo'})
-    assert_equal(1, len(foo_sinks))
-    assert_in(SymmetricTestPlugin, foo_sinks)
-
-    bar_sinks = databus.sinks_for({'Type': 'bar'})
-    assert_equal(2, len(bar_sinks))
-    assert_in(TestPlugin, bar_sinks)
-    assert_in(DuplicateTestPlugin, bar_sinks)
-
-    baz_sinks = databus.sinks_for({'Type': 'baz'})
-    assert_equal(2, len(baz_sinks))
-    assert_in(TestPlugin, baz_sinks)
-    assert_in(DuplicateTestPlugin, baz_sinks)
+    type1_sinks = databus.sinks_for('type1')
+    assert_equal(2, len(type1_sinks))
+    assert_in(SymmetricTestPlugin, type1_sinks)
+    assert_in(UberPlugin, type1_sinks)
+    
+    type2_sinks = databus.sinks_for('type2')
+    assert_equal(2, len(type2_sinks))
+    assert_in(TestPlugin, type2_sinks)
+    assert_in(UberPlugin, type2_sinks)
+    
+    type3_sinks = databus.sinks_for('type3')
+    assert_equal(2, len(type3_sinks))
+    assert_in(TestPlugin, type3_sinks)
+    assert_in(UberPlugin, type3_sinks)
 
 
 class TestPlugin(BasePlugin):
@@ -94,15 +105,16 @@ class TestPlugin(BasePlugin):
 
     @classmethod
     def sinks(cls):
-        return [{'Type': 'bar'}, {'Type': 'baz'}]
+        return ['type2', 'type3']
 
     @classmethod
     def sources(cls):
-        return [{'Type': 'file/.foo'}]
+        return ['type1']
 
     def run(self):
         pass
 
+    
 class SymmetricTestPlugin(BasePlugin):
     '''Super simple plugin that is symmetric to TestPlugin
     '''
@@ -111,28 +123,29 @@ class SymmetricTestPlugin(BasePlugin):
 
     @classmethod
     def sinks(cls):
-        return [{'Type': 'file/.foo'}]
+        return ['type1']
 
     @classmethod
     def sources(cls):
-        return [{'Type': 'bar'}, {'Type': 'baz'}]
+        return ['type2', 'type3']
 
     def run(self):
         pass
 
-class DuplicateTestPlugin(BasePlugin):
-    '''Super simple plugin that is identical to TestPlugin
+
+class UberPlugin(BasePlugin):
+    '''We do it all -- if not very well.
     '''
     def __init__(self):
         super().__init__()
 
     @classmethod
     def sinks(cls):
-        return [{'Type': 'bar'}, {'Type': 'baz'}]
+        return ['type1', 'type2', 'type3']
 
     @classmethod
     def sources(cls):
-        return [{'Type': 'file/.foo'}]
+        return ['type1', 'type2', 'type3']
 
     def run(self):
         pass
