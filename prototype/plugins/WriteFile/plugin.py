@@ -66,7 +66,7 @@ class WriteFile(BasePlugin):
 
     @classmethod
     def sinks(cls):
-        return ['json']
+        return ['text']
 
 
     @classmethod
