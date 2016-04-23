@@ -47,6 +47,19 @@ __author__ = 'Keith T. Star <keith@pnnl.gov>'
 
 _log = logging.getLogger()
 
+def define_types(tm):
+    '''Initialize Types
+    Create type definitions for anthing that we source or sink, that isn't
+    already defined by Sphinx Core.
+    We are passed the TypeManager instance to use.
+    '''
+    # TODO: This should probably include the encoding, e.g., UTF-8, etc.
+    # I'm not doing that now though because it opens a huge can of worms:
+    # having to explicitly deal with character encodings, etc.
+    tm.define_type('text',
+                   {'data': {'type': 'string'}})
+
+
 class ReadFile(BasePlugin):
     '''Plugin for reading a file
     This reads a text file, and yields a single line at a time.  We'll likely
@@ -66,9 +79,7 @@ class ReadFile(BasePlugin):
 
     @classmethod
     def sources(cls):
-        return [
-            {'Type': 'text', }
-        ]
+        return ['text']
 
 
     @asyncio.coroutine
@@ -80,9 +91,11 @@ class ReadFile(BasePlugin):
 
     @asyncio.coroutine
     def run(self):
+        # Note that we are opening the file asynchronously.
         file = yield from self.open()
         for line in file:
-            yield from self.publish(line)
+            data = self._tm.new_text(data=line)
+            yield from self.publish(data)
 
         yield from self.done()
         file.close()

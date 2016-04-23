@@ -66,14 +66,12 @@ class WriteFile(BasePlugin):
 
     @classmethod
     def sinks(cls):
-        return [{'Type': 'file/.in'}]
+        return ['json']
 
 
     @classmethod
     def sources(cls):
-        return [
-            {'Type': 'plug-in/runner', }
-        ]
+        return ['file']
 
 
     @asyncio.coroutine

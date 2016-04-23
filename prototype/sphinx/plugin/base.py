@@ -112,8 +112,23 @@ class BasePlugin(metaclass=ABCMeta):
         '''Read data from queue
         Called by plugins to get data from their sources.
         '''
-        data = yield from self._queue.get()
-        return json.loads(data)
+        payload = yield from self._queue.get()
+
+        payload = json.loads(payload)
+
+        if payload:
+            # At this time, we only support a single object being sent at one time.
+            read_type = list(payload.keys())
+            assert(len(read_type) == 1)
+            read_type = read_type[0]
+            
+            if read_type not in self.sinks():
+                raise ImpedenceMismatchError("Cannot sink '{}'".format(read_type))
+
+            return payload[read_type]
+        
+        else:
+            return payload
 
 
     @coroutine
@@ -121,6 +136,8 @@ class BasePlugin(metaclass=ABCMeta):
         '''The plugin is finished
         Called by a plugin to indicate to it's sinks that it has no more data.
         '''
+        # TODO: It feels clumsy to use getting "None" as "EOT".  Also, it
+        # requires that the plugins test for it to stop reading data.
         yield from self.publish(None)
 
 
@@ -165,3 +182,8 @@ class BasePlugin(metaclass=ABCMeta):
         some work.
         '''
         pass
+
+
+class ImpedenceMismatchError(Exception):
+    pass
+    

@@ -49,7 +49,19 @@ __author__ = 'Keith T. Star <keith@pnnl.gov>'
 
 _log = logging.getLogger()
 
+def define_types(tm):
+    '''Initialize Types
+    Create type definitions for anthing that we source or sink, that isn't
+    already defined by Sphinx Core.
+    We are passed the TypeManager instance to use.
+    '''
+    # TODO: This should probably include the encoding, e.g., UTF-8, etc.
+    # I'm not doing that now though because it opens a huge can of worms:
+    # having to explicitly deal with character encodings, etc.
+    tm.define_type('json',
+                   {'data': {'type': 'object'}})
 
+    
 def run_geoflow(atoms):
     '''Start the geoflow process.
     We have to instantiate the solver, and then run 'process_molecule' in the
@@ -91,14 +103,12 @@ class Geoflow(BasePlugin):
 
     @classmethod
     def sinks(cls):
-        return [{'Type': 'atom/position-size'}]
+        return ['apbs_atom']
 
 
     @classmethod
     def sources(cls):
-        return [
-            {'Type': 'text'}
-        ]
+        return ['text']
 
 
     @asyncio.coroutine
@@ -108,7 +118,6 @@ class Geoflow(BasePlugin):
             while True:
                 data = yield from self.read_data()
                 if data:
-                    data = data['apbs_atom']
                     self._atoms.append({
                         'pos': (
                             data['Cartn_x'],
@@ -125,7 +134,7 @@ class Geoflow(BasePlugin):
             result = yield from self.runner.run_as_process(run_geoflow,
                     {'atoms': self._atoms})
 
-            yield from self.publish(result)
+            yield from self.publish(self._tm.new_json(data=result[0]))
             yield from self.done()
         except Exception as e:
             _log.exception('Unhandled exception:')

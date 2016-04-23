@@ -63,7 +63,7 @@ class ShellOut(BasePlugin):
 
     @classmethod
     def sources(cls):
-        return [{'Type': 'ls/l'}]
+        return ['text']
 
 
     @asyncio.coroutine
