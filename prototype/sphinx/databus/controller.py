@@ -38,6 +38,8 @@
 # THE POSSIBILITY OF SUCH DAMAGE.
 #}}}
 
+from asyncio import coroutine
+
 import logging
 
 from .typemanager import *
@@ -50,6 +52,7 @@ _log = logging.getLogger()
 
 class SDBController:
     '''Semantic Databus Controller
+
     This controller is the main point of contact for plug-ins to register
     themselves, and to request data from other plug-ins.
     '''
@@ -115,4 +118,15 @@ class SDBController:
         '''Get plug-ins that grok a sink
         '''
         return self._sink_types[type]
+
+
+    @coroutine
+    def publish(self, data, sinks):
+        '''Publish to the databus
+
+        Plugins will invoke this method to publish data to the databus, which
+        will eventually be routed to the destination plugin(s).
+        '''
+        for sink in sinks:
+            yield from sink.write_data(data)
 

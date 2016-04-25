@@ -57,7 +57,7 @@ def define_types(tm):
     # I'm not doing that now though because it opens a huge can of worms:
     # having to explicitly deal with character encodings, etc.
     tm.define_type('text',
-                   {'data': {'type': 'string'}})
+                   {'line': {'type': 'string'}})
 
 
 class ReadFile(BasePlugin):
@@ -78,6 +78,11 @@ class ReadFile(BasePlugin):
 
 
     @classmethod
+    def sinks(cls):
+        return ['file']
+    
+
+    @classmethod
     def sources(cls):
         return ['text']
 
@@ -94,7 +99,7 @@ class ReadFile(BasePlugin):
         # Note that we are opening the file asynchronously.
         file = yield from self.open()
         for line in file:
-            data = self._tm.new_text(data=line)
+            data = self._tm.new_text(line=line)
             yield from self.publish(data)
 
         yield from self.done()

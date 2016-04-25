@@ -70,16 +70,16 @@ class ParseXYZR(BasePlugin):
 
     @classmethod
     def sources(cls):
-        return ['abps_atom']
+        return ['apbs_atom']
 
 
     @asyncio.coroutine
     def run(self):
         seq = 1
         while True:
-            text = yield from self.read_data()
-            if text:
-                x, y, z, r, c = text['data'].split()
+            data = yield from self.read_data()
+            if data:
+                x, y, z, r, c = data['text']['line'].split()
                 record = self._tm.new_apbs_atom(
                         id='?',
                         label_alt_id='?',

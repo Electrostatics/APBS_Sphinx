@@ -50,6 +50,7 @@ __author__ = 'Keith T. Star <keith@pnnl.gov>'
 
 class BasePlugin(metaclass=ABCMeta):
     '''Core plug-in functionality
+
     A Sphinx plug-in needs to provide a minimim set of services in order to be
     useful.  Those are defined here, with default implementations where it
     makes sense.
@@ -62,7 +63,12 @@ class BasePlugin(metaclass=ABCMeta):
     _tm = None
 
     def __init__(self, runner, plugins, source = None):
-        '''Ctor
+        '''Constructor
+
+        This is how our plugin pipeline is constructed.  Each plugin instance
+        is created when the input script is read, and they are chained together,
+        from source to sink, here.
+
         This method _must_ be called with the event loop from which it will be
         called in the future, e.g., asyncio.get_event_loop().
         '''
@@ -71,9 +77,14 @@ class BasePlugin(metaclass=ABCMeta):
         # Retain a pointer to our source, and add ourself to it's list of sinks.
         self._source = source
         if source:
-            source._sinks.append(self)
+            # Validate that we can process data from this source
+            if len(set(source.sources()).intersection(self.sinks())):
+                source._sinks.append(self)
+            else:
+                raise ImpedenceMismatchError("{} cannot sink '{}'".format(
+                    self, source.sources()))
 
-        # Producer/consumer queue
+        # Our input queue
         self._queue = Queue()
 
         self.runner = runner
@@ -86,6 +97,7 @@ class BasePlugin(metaclass=ABCMeta):
 
     def __getattr__(self, name):
         '''Plugin Pipeline Bulding
+
         This method is called when Python can't find a requested attribute. We
         use it to create a new plugin instance to add to the pipeline.
         '''
@@ -98,42 +110,31 @@ class BasePlugin(metaclass=ABCMeta):
     @coroutine
     def publish(self, data):
         '''Publish data
+
         Called by a plugin to publish data to it's sinks.
         '''
-        # Turn the data dict into a JSON string before sending it.  This may
-        # not make a lot of sense yet, but eventually serialization for
-        # transport will be essential.
-        for sink in self._sinks:
-            yield from sink._queue.put(json.dumps(data))
+        yield from self._databus.publish(data, self._sinks)
 
+
+    @coroutine
+    def write_data(self, data):
+        yield from self._queue.put(data)
+        
 
     @coroutine
     def read_data(self):
         '''Read data from queue
+
         Called by plugins to get data from their sources.
         '''
         payload = yield from self._queue.get()
-
-        payload = json.loads(payload)
-
-        if payload:
-            # At this time, we only support a single object being sent at one time.
-            read_type = list(payload.keys())
-            assert(len(read_type) == 1)
-            read_type = read_type[0]
-            
-            if read_type not in self.sinks():
-                raise ImpedenceMismatchError("Cannot sink '{}'".format(read_type))
-
-            return payload[read_type]
+        return payload
         
-        else:
-            return payload
-
 
     @coroutine
     def done(self):
         '''The plugin is finished
+
         Called by a plugin to indicate to it's sinks that it has no more data.
         '''
         # TODO: It feels clumsy to use getting "None" as "EOT".  Also, it
@@ -141,9 +142,15 @@ class BasePlugin(metaclass=ABCMeta):
         yield from self.publish(None)
 
 
+        
+    # Sources and sinks, oh my!  These follow the current flow analogy.
+    # Data flows from a source to a sink.  Our input comes from a source,
+    # and we sink it, process the data in some manner, and then source
+    # it to the next plugin in the pipeline.
     @classmethod
     def sinks(cls):
         '''Sink types
+
         These are an array of types that we sink, i.e., read.
         '''
         return []
@@ -152,6 +159,7 @@ class BasePlugin(metaclass=ABCMeta):
     @classmethod
     def sources(cls):
         '''Source types
+
         These are an array of types that we source, i.e., write.
         '''
         return []
@@ -160,6 +168,7 @@ class BasePlugin(metaclass=ABCMeta):
     @classmethod
     def set_databus(cls, db):
         '''A handler to the Semantic Databus
+
         This gets set when the plug-in is registered.
         '''
         cls._databus = db
@@ -169,6 +178,7 @@ class BasePlugin(metaclass=ABCMeta):
     @classmethod
     def script_name(cls):
         '''Return the plug-in's script name.
+
         The script name is how the plug-in is referred to by command scripts.
         '''
         pass
@@ -177,7 +187,8 @@ class BasePlugin(metaclass=ABCMeta):
     @abstractmethod
     @coroutine
     def run(self):
-        '''Our main method where work is done
+        '''Our main method where work happens
+
         This is the method that will be invoked when the plug-in needs to do
         some work.
         '''

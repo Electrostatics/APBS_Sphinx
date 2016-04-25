@@ -105,14 +105,15 @@ class Geoflow(BasePlugin):
             while True:
                 data = yield from self.read_data()
                 if data:
+                    value = data['apbs_atom']
                     self._atoms.append({
                         'pos': (
-                            data['Cartn_x'],
-                            data['Cartn_y'],
-                            data['Cartn_z']
+                            value['Cartn_x'],
+                            value['Cartn_y'],
+                            value['Cartn_z']
                         ),
-                        'radius': data['radius'],
-                        'charge': data['charge']
+                        'radius': value['radius'],
+                        'charge': value['charge']
                     })
                 else:
                     break
@@ -121,7 +122,7 @@ class Geoflow(BasePlugin):
             result = yield from self.runner.run_as_process(run_geoflow,
                     {'atoms': self._atoms})
 
-            yield from self.publish(self._tm.new_text(data=str(result)))
+            yield from self.publish(self._tm.new_text(line=str(result)))
             yield from self.done()
         except Exception as e:
             _log.exception('Unhandled exception:')

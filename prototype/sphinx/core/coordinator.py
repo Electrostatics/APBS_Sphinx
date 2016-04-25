@@ -101,7 +101,8 @@ class Coordinator:
         except KeyboardInterrupt:
             pass
 
-        except Exception:
+        except Exception as e:
+            _log.error(e)
             print("Oops -- something bad happened.  Check io.mc for details")
 
         finally:

@@ -80,7 +80,9 @@ class WriteFile(BasePlugin):
             while True:
                 data = yield from self.read_data()
                 if data:
-                    file.write(json.dumps(data, indent=2 * ' '))
+                    value = data['text']
+                    _log.info("WriteFile: writing {}".format(value))
+                    file.write(str(value))
                 else:
                     # End of input
                     break
