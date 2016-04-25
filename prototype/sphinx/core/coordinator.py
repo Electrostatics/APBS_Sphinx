@@ -170,5 +170,9 @@ class Coordinator:
 
                 # TODO: This is pretty lame, but it's a quick and dirty way to
                 # see how this python-as-input-script-thing is going to work out.
+                # For those of you just catching up, _plugin_funcs is a dict that
+                # maps from input-script level keywords to the plugin that does
+                # the work.  Below we partially apply the constructor to work with
+                # this class instance.
                 self._plugin_funcs[plugin.script_name()] = partial(plugin,
                     runner = self, plugins = self._plugin_funcs)
