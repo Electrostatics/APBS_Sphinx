@@ -53,9 +53,9 @@ def setup_plugins():
     # This is digging in the guts of the controller, and currently there's no
     # interface to add types.  However, for a test, I don't think that this
     # is too terrible.
-    databus._typemgr.define_type('type1', {'datum': { 'type': 'number'}})
-    databus._typemgr.define_type('type2', {'datum': { 'type': 'string'}})
-    databus._typemgr.define_type('type3', {'datum': { 'type': 'boolean'}})
+    databus._typemgr.define_type('type1', {'datum': {'type': 'number'}})
+    databus._typemgr.define_type('type2', {'datum': {'type': 'string'}})
+    databus._typemgr.define_type('type3', {'datum': {'type': 'boolean'}})
     
     databus.add_plugin(TestPlugin)
     databus.add_plugin(SymmetricTestPlugin)
