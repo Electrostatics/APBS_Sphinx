@@ -17,7 +17,10 @@ geo_output.write_file(params['outfile'])
 
 geo_output.write_stdout()
 
-# You can specify multiple chains
+# You can specify multiple chains...
+# Note that the parens are here so that we can write the pipeline on multiple
+# lines.  This is just one of the reasnos I'm not super keen on using Python
+# for these files.
 (
     # This is specifically meant to work by running apbs.py as directed in the
     # README.md file.  Yes, it's lame, but it's a start.
