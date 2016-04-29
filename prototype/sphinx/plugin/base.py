@@ -44,7 +44,7 @@ from asyncio import coroutine, Queue
 import simplejson as json
 from functools import partial
 
-__all__ = ['BasePlugin']
+__all__ = ['BasePlugin', 'ImpedenceMismatchError']
 
 __author__ = 'Keith T. Star <keith@pnnl.gov>'
 

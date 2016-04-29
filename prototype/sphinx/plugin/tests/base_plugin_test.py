@@ -40,9 +40,73 @@
 
 from nose.tools import *
 
-import asyncio
+from functools import partial
 
-from sphinx.databus import SDBController
-from sphinx.plugin import BasePlugin
+from sphinx.plugin import *
 
 __author__ = 'Keith T. Star <keith@pnnl.gov>'
+
+def setup_runner():
+    global runner
+    runner = TestRunner()
+
+
+@with_setup(setup_runner)
+def test_impedence():
+    '''Test Impedence Match
+
+    Validate that impedence checking works ok when the source matches the sink.
+    '''
+    source = runner.load('source')
+    assert_is_instance(source().sink(), SinkPlugin)
+
+
+@with_setup(setup_runner)
+@raises(ImpedenceMismatchError)
+def test_impedence_fail():
+    '''Test Impedence Mismatch
+
+    Verify that the ImpedenceMismatchError is thrown when a source does not
+    match the sink.
+    '''
+    sink = runner.load('sink')
+    sink().source()
+
+
+class TestRunner():
+    def __init__(self):
+        self._plugin_dict = {}
+
+        self._plugin_dict = {'source': None, 'sink': None}
+        self._plugin_dict['sink'] = partial(SinkPlugin, runner=self, plugins=self._plugin_dict)
+        self._plugin_dict['source'] = partial(SourcePlugin, runner=self, plugins=self._plugin_dict)
+
+    def load(self, plugin):
+        return self._plugin_dict[plugin]
+        
+    def create_task(self, func):
+        pass
+        
+
+class SourcePlugin(BasePlugin):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    @classmethod
+    def sources(cls):
+        return ['a_number'];
+
+    def run(self):
+        pass
+
+
+class SinkPlugin(BasePlugin):
+    def __init_(self, **kwargs):
+        super().__init__(**kwargs)
+
+    @classmethod
+    def sinks(cls):
+        return ['a_number']
+
+    def run(self):
+        pass
