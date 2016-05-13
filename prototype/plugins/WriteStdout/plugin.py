@@ -82,7 +82,7 @@ class WriteStdout(BasePlugin):
                 # Our sole sink.  If we had different types that we could sink,
                 # then we would have to test for the type, and handle it
                 # appropriately.
-                value = data['text']
+                value = data['text']['line']
                 _log.info("WriteStdout: writing {}".format(value))
                 sys.stdout.write(str(value))
 

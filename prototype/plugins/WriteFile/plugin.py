@@ -80,7 +80,7 @@ class WriteFile(BasePlugin):
             while True:
                 data = yield from self.read_data()
                 if data:
-                    value = data['text']
+                    value = data['text']['line']
                     _log.info("WriteFile: writing {}".format(value))
                     file.write(str(value))
                 else:
