@@ -55,8 +55,9 @@ class ParseXYZR(BasePlugin):
     '''
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        _log.info("ParseXYZR plug-in initialized.")
         _data = {}
+
+        _log.info("ParseXYZR plug-in initialized.")
 
 
     @classmethod
@@ -97,7 +98,7 @@ class ParseXYZR(BasePlugin):
                               'charge': float(c)}
                 seq += 1
 
-                yield from self.publish(data)
+                yield from self.publish(self._data)
 
             else:
                 break
@@ -107,7 +108,7 @@ class ParseXYZR(BasePlugin):
 
     def xform_data(self, data, to_type):
         if to_type == 'apbs_atom':
-            return self._tm.new_apbs_atom(self._data)
+            return self._tm.new_apbs_atom(data)
 
         elif to_type == 'text':
-            return self._tm.new_text(line=str(self._data))
+            return self._tm.new_text(line=str(data))
