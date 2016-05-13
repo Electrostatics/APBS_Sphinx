@@ -77,3 +77,7 @@ class ShellOut(BasePlugin):
         self._process_output, _ = yield from self._process.communicate()
 
         return self._process
+
+
+    def xform_data(self, data, to_type):
+        return data

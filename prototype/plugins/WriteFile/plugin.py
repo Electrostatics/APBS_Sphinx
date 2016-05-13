@@ -88,3 +88,7 @@ class WriteFile(BasePlugin):
                     break
 
         _log.info("WriteFile: wrote {}.".format(self._file))
+
+
+    def xform_data(self, data, to_type):
+        return data

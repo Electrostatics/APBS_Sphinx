@@ -92,3 +92,7 @@ class WriteStdout(BasePlugin):
                 break
 
         _log.info("WriteStdout: done")
+
+
+    def xform_data(self, data, to_type):
+        return data

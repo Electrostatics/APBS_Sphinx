@@ -104,3 +104,8 @@ class ReadFile(BasePlugin):
 
         yield from self.done()
         file.close()
+
+
+    def xform_data(self, data, to_type):
+        return data
+ 

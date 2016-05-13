@@ -72,14 +72,18 @@ class BasePlugin(metaclass=ABCMeta):
         This method _must_ be called with the event loop from which it will be
         called in the future, e.g., asyncio.get_event_loop().
         '''
-        self._sinks = []
+
+        # A dict that maps each destination for our data, to the type that the
+        # destination can consume.
+        self._sinks = {}
 
         # Retain a pointer to our source, and add ourself to it's list of sinks.
         self._source = source
         if source:
             # Validate that we can process data from this source
-            if len(set(source.sources()).intersection(self.sinks())):
-                source._sinks.append(self)
+            sink_types = set(source.sources()).intersection(self.sinks())
+            if len(sink_types):
+                source._set_sink(self, sink_types.pop())
             else:
                 raise ImpedenceMismatchError("{} cannot sink '{}'".format(
                     self, source.sources()))
@@ -107,17 +111,36 @@ class BasePlugin(metaclass=ABCMeta):
         else:
             raise AttributeError
 
+
+    def _set_sink(self, sink, data_type):
+        '''Register a sink
+
+        Called during initialization to register a sink (destination for our
+        output).
+        '''
+        self._sinks[sink] = data_type
+        
+
     @coroutine
     def publish(self, data):
         '''Publish data
 
         Called by a plugin to publish data to it's sinks.
         '''
-        yield from self._databus.publish(data, self._sinks)
+        for sink, data_type in self._sinks.items():
+            # Special case 'None', since that's our 'eof'.  See the 'done'
+            # method below.
+            if data:
+                data = self.xform_data(data, data_type)
+            yield from self._databus.publish(data, sink)
 
 
     @coroutine
     def write_data(self, data):
+        '''Write data to queue
+        
+        Called by the databus controller to enqueue data from our source.
+        '''
         yield from self._queue.put(data)
         
 
@@ -185,7 +208,22 @@ class BasePlugin(metaclass=ABCMeta):
 
 
     @abstractmethod
+    def xform_data(self, data, to_type):
+        '''Transform data to a specific type
+
+        This method must be able to transform the input, 'data', to the 'to_type'.
+        The plugin will only be responsible for transforming types that are
+        specified in our "sources" method.
+
+        There is no expectation on how the plugin represents 'data', but it would
+        make sense to do so in some manner that is not only natural for the plugin,
+        but also easily transformed.
+        '''
+        pass
+    
+
     @coroutine
+    @abstractmethod
     def run(self):
         '''Our main method where work happens
 

@@ -123,6 +123,12 @@ class Geoflow(BasePlugin):
                     {'atoms': self._atoms})
 
             yield from self.publish(self._tm.new_text(line=str(result)))
+
             yield from self.done()
         except Exception as e:
             _log.exception('Unhandled exception:')
+
+
+    def xform_data(self, data, to_type):
+        return data
+

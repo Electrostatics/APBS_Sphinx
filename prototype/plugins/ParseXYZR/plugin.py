@@ -56,6 +56,7 @@ class ParseXYZR(BasePlugin):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         _log.info("ParseXYZR plug-in initialized.")
+        _data = {}
 
 
     @classmethod
@@ -70,7 +71,7 @@ class ParseXYZR(BasePlugin):
 
     @classmethod
     def sources(cls):
-        return ['apbs_atom']
+        return ['apbs_atom', 'text']
 
 
     @asyncio.coroutine
@@ -80,25 +81,33 @@ class ParseXYZR(BasePlugin):
             data = yield from self.read_data()
             if data:
                 x, y, z, r, c = data['text']['line'].split()
-                record = self._tm.new_apbs_atom(
-                        id='?',
-                        label_alt_id='?',
-                        label_asym_id='?',
-                        label_atom_id='?',
-                        label_comp_id='?',
-                        label_entity_id='?',
-                        label_seq_id = seq,
-                        type_symbol = '?',
-                        auth_asym_id = '?',
-                        Cartn_x = float(x),
-                        Cartn_y = float(y),
-                        Cartn_z = float(z),
-                        radius=float(r),
-                        charge=float(c))
+                self._data = {'id': '?',
+                              'label_alt_id': '?',
+                              'label_asym_id': '?',
+                              'label_atom_id': '?',
+                              'label_comp_id': '?',
+                              'label_entity_id': '?',
+                              'label_seq_id': seq,
+                              'type_symbol': '?',
+                              'auth_asym_id': '?',
+                              'Cartn_x': float(x),
+                              'Cartn_y': float(y),
+                              'Cartn_z': float(z),
+                              'radius': float(r),
+                              'charge': float(c)}
                 seq += 1
 
-                yield from self.publish(record)
+                yield from self.publish(data)
+
             else:
                 break
 
         yield from self.done()
+
+
+    def xform_data(self, data, to_type):
+        if to_type == 'apbs_atom':
+            return self._tm.new_apbs_atom(self._data)
+
+        elif to_type == 'text':
+            return self._tm.new_text(line=str(self._data))

@@ -121,12 +121,11 @@ class SDBController:
 
 
     @coroutine
-    def publish(self, data, sinks):
+    def publish(self, data, sink):
         '''Publish to the databus
 
         Plugins will invoke this method to publish data to the databus, which
         will eventually be routed to the destination plugin(s).
         '''
-        for sink in sinks:
-            yield from sink.write_data(data)
+        yield from sink.write_data(data)
 

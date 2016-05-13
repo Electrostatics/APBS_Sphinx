@@ -109,3 +109,7 @@ class SillyServer(BasePlugin):
             print("client sent: {}".format(data))
 
             yield from writer.drain()
+
+
+    def xform_data(self, data, to_type):
+        return data
