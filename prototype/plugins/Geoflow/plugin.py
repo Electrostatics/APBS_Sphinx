@@ -122,7 +122,7 @@ class Geoflow(BasePlugin):
             result = yield from self.runner.run_as_process(run_geoflow,
                     {'atoms': self._atoms})
 
-            yield from self.publish(self._tm.new_text(line=str(result)))
+            yield from self.publish(self._tm.new_text(lines=[str(result)]))
 
             yield from self.done()
         except Exception as e:

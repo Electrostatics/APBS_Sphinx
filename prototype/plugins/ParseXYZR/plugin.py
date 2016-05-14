@@ -81,24 +81,25 @@ class ParseXYZR(BasePlugin):
         while True:
             data = yield from self.read_data()
             if data:
-                x, y, z, r, c = data['text']['line'].split()
-                self._data = {'id': '?',
-                              'label_alt_id': '?',
-                              'label_asym_id': '?',
-                              'label_atom_id': '?',
-                              'label_comp_id': '?',
-                              'label_entity_id': '?',
-                              'label_seq_id': seq,
-                              'type_symbol': '?',
-                              'auth_asym_id': '?',
-                              'Cartn_x': float(x),
-                              'Cartn_y': float(y),
-                              'Cartn_z': float(z),
-                              'radius': float(r),
-                              'charge': float(c)}
-                seq += 1
+                for line in data['text']['lines']:
+                    x, y, z, r, c = line.split()
+                    self._data = {'id': '?',
+                                  'label_alt_id': '?',
+                                  'label_asym_id': '?',
+                                  'label_atom_id': '?',
+                                  'label_comp_id': '?',
+                                  'label_entity_id': '?',
+                                  'label_seq_id': seq,
+                                  'type_symbol': '?',
+                                  'auth_asym_id': '?',
+                                  'Cartn_x': float(x),
+                                  'Cartn_y': float(y),
+                                  'Cartn_z': float(z),
+                                  'radius': float(r),
+                                  'charge': float(c)}
+                    seq += 1
 
-                yield from self.publish(self._data)
+                    yield from self.publish(self._data)
 
             else:
                 break
@@ -111,4 +112,4 @@ class ParseXYZR(BasePlugin):
             return self._tm.new_apbs_atom(data)
 
         elif to_type == 'text':
-            return self._tm.new_text(line=str(data))
+            return self._tm.new_text(lines=[str(data)])

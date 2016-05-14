@@ -57,8 +57,15 @@ def define_types(tm):
     # I'm not doing that now though because it opens a huge can of worms:
     # having to explicitly deal with character encodings, etc.
     tm.define_type('text',
-                   {'line': {'type': 'string'}})
+                   {
+                       'lines': {
+                           'type': 'array',
+                           'items': {'type': 'string'}
+                       }
+                   })
+        
 
+LINE_COUNT = 100
 
 class ReadFile(BasePlugin):
     '''Plugin for reading a file
@@ -67,8 +74,9 @@ class ReadFile(BasePlugin):
     this plugin should reflect the type of data that it produces.
     '''
     def __init__(self, file, **kwargs):
-        self._file = file
         super().__init__(**kwargs)
+
+        self._file = file
         _log.info("ReadFile plug-in initialized.")
 
 
@@ -87,20 +95,42 @@ class ReadFile(BasePlugin):
         return ['text']
 
 
-    @asyncio.coroutine
-    # I don't know that this is necessary, so much as it may prove to be
+    # I don't know that these are necessary, so much as they may prove to be
     # pedagogical.
+    @asyncio.coroutine
     def open(self):
         return open(self._file, 'r')
+
+    @asyncio.coroutine
+    def read_lines(self, file):
+        lines = []
+        for c in range(LINE_COUNT):
+            line = file.readline()
+
+            if line == "":
+                break
+            
+            lines.append(line)
+
+        return lines
 
 
     @asyncio.coroutine
     def run(self):
-        # Note that we are opening the file asynchronously.
+        # Note that we are opening and reading the file asynchronously.
         file = yield from self.open()
-        for line in file:
-            data = self._tm.new_text(line=line)
+        lines = yield from self.read_lines(file)
+
+        while lines:
+            data = self._tm.new_text({'lines': lines})
             yield from self.publish(data)
+
+            # This sleep allows subsequent plugins to start doing their
+            # thing.
+            yield from asyncio.sleep(0)
+            
+            lines = yield from self.read_lines(file)
+
 
         yield from self.done()
         file.close()

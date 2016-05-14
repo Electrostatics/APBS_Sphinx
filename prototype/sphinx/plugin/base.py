@@ -40,6 +40,7 @@
 
 from abc import ABCMeta, abstractmethod
 from asyncio import coroutine, Queue
+import logging
 
 import simplejson as json
 from functools import partial
@@ -47,6 +48,8 @@ from functools import partial
 __all__ = ['BasePlugin', 'ImpedenceMismatchError']
 
 __author__ = 'Keith T. Star <keith@pnnl.gov>'
+
+_log = logging.getLogger()
 
 class BasePlugin(metaclass=ABCMeta):
     '''Core plug-in functionality
@@ -84,9 +87,11 @@ class BasePlugin(metaclass=ABCMeta):
             sink_types = set(source.sources()).intersection(self.sinks())
             if len(sink_types):
                 source._set_sink(self, sink_types.pop())
+                
             else:
-                raise ImpedenceMismatchError("{} cannot sink '{}'".format(
-                    self, source.sources()))
+                err = "{} cannot sink '{}'".format(self, source.sources())
+                _log.error(err)
+                raise ImpedenceMismatchError(err)
 
         # Our input queue
         self._queue = Queue()

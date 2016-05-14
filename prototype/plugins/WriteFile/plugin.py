@@ -76,18 +76,21 @@ class WriteFile(BasePlugin):
 
     @asyncio.coroutine
     def run(self):
+        _log.info("WriteFile started")
         with open(self._file, 'w') as file:
             while True:
                 data = yield from self.read_data()
                 if data:
-                    value = data['text']['line']
-                    _log.info("WriteFile: writing {}".format(value))
-                    file.write(str(value))
+                    for value in data['text']['lines']:
+                        file.write(str(value))
+
+                    _log.info("WriteFile: wrote {} lines".format(len(data['text']['lines'])))
+
                 else:
                     # End of input
                     break
 
-        _log.info("WriteFile: wrote {}.".format(self._file))
+        _log.info("WriteFile: closed {}.".format(self._file))
 
 
     def xform_data(self, data, to_type):

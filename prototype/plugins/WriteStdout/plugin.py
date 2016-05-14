@@ -79,19 +79,16 @@ class WriteStdout(BasePlugin):
         while True:
             data = yield from self.read_data()
             if data:
-                # Our sole sink.  If we had different types that we could sink,
-                # then we would have to test for the type, and handle it
-                # appropriately.
-                value = data['text']['line']
-                _log.info("WriteStdout: writing {}".format(value))
-                sys.stdout.write(str(value))
+                for value in data['text']['lines']:
+                    sys.stdout.write(str(value))
+
+                _log.info("WriteStdout: wrote {} lines".format(len(data['text']['lines'])))
 
                 sys.stdout.flush()
+
             else:
                 # End of input
                 break
-
-        _log.info("WriteStdout: done")
 
 
     def xform_data(self, data, to_type):
