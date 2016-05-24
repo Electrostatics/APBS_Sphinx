@@ -2,9 +2,7 @@
 This is still very much in the prototype phase.  Beyond here there be monsters!
 
 ## Building the Beast
-First off, you'll need Python 3.4.3.  Python 3.4.x may work just as well, but I haven't tried.  You'll also need a C++11 compiler and CMake.
-
-The process is anything but automagic, and we hope to fix that before too much longer.
+First off, you'll need Python 3.4.3.  Python 3.4.x may work just as well, but I haven't tried.  You'll also need a C++11 compiler and CMake (3.2.x).
 
 ### Install Python Virtual Environment, install dependencies and generate JSON schema from PDBx/mmCIF star file
 1. `cd <sphinx_repo>/prototype`
@@ -25,7 +23,7 @@ We are currently using Nose to run the unit tests.  From the `prototype` directo
 
 ## Running the Beast
 From `<sphinx_repo>/prototype` try this:
-`./apbs.py example/geoflow.apbs infile=example/imidazole.xyzr outfile=imidazole.txt`
+`python apbs.py example/geoflow.apbs infile=example/imidazole.xyzr outfile=imidazole.txt`
 
 It just ran the geometric flow solver on *imidazole.xyzr* and printed some electrostatic information about the molecule into *imidazole.txt*.
 
