@@ -74,7 +74,7 @@ class Coordinator:
         # Get a handle to our event loop.
         if os.name == 'nt':
             self._loop = asyncio.ProactorEventLoop()
-            asyncio.set_event_loop(loop)
+            asyncio.set_event_loop(self._loop)
         else:
             self._loop = asyncio.get_event_loop()
 
