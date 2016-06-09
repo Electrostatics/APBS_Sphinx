@@ -6,7 +6,7 @@ python:
     - nightly
     
 install:
-    - pip install --user -r packages.txt
+    - pip install -r packages.txt
     - python -m sphinx.bootstrap
 
 script:
