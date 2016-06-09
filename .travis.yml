@@ -1,2 +1,13 @@
 language: python
 python:
+    - 3.4
+    - 3.5
+    - 3.5-dev
+    - nightly
+    
+install:
+    - python bootstrap.py
+    
+script:
+    - source sphinx-env/bin/activate
+    - nosetests
