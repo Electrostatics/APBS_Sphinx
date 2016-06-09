@@ -66,7 +66,7 @@ def run_pbam(molecules):
     return result
 
 
-class PBAM(BasePlugin):
+class PB_S_AM(BasePlugin):
     '''Plugin for running pbam flow
     '''
     def __init__(self, **kwargs):
