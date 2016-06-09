@@ -6,10 +6,9 @@ python:
     - nightly
     
 install:
-    - ls -l
-    - python bootstrap.py
-    - ls -l sphinx-env/bin
-    
+    - pip install --user -r packages.txt
+    - python -m sphinx.bootstrap
+
 script:
     - source sphinx-env/bin/activate
     - nosetests
