@@ -1,0 +1,3 @@
+[submodule "prototype/plugins/PB_S_AM/src"]
+	path = prototype/plugins/PB_S_AM/src
+	url = https://github.com/davas301/pb_solvers
