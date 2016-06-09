@@ -11,3 +11,7 @@ install:
 script:
     - source sphinx-env/bin/activate
     - nosetests
+
+branches:
+    only
+        - develop
