@@ -11,7 +11,3 @@ install:
 
 script:
     - nosetests
-
-branches:
-    only
-        - develop
