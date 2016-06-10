@@ -80,7 +80,7 @@ class WriteStdout(BasePlugin):
             data = yield from self.read_data()
             if data:
                 for value in data['text']['lines']:
-                    sys.stdout.write(str(value))
+                    sys.stdout.write(str(value) + '\n')
 
                 _log.info("WriteStdout: wrote {} lines".format(len(data['text']['lines'])))
 

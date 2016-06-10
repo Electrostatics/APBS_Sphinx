@@ -82,7 +82,7 @@ class WriteFile(BasePlugin):
                 data = yield from self.read_data()
                 if data:
                     for value in data['text']['lines']:
-                        file.write(str(value))
+                        file.write(str(value) + '\n')
 
                     _log.info("WriteFile: wrote {} lines".format(len(data['text']['lines'])))
 
