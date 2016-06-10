@@ -130,7 +130,6 @@ class ParsePDB(BasePlugin):
                 break
 
         # We need to wait until the entire PDB file is read before we can publish.
-        self._tm.new_pdb_file(self._pdb)
         yield from self.publish(self._pdb)
         yield from self.done()
 
