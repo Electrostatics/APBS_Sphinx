@@ -118,6 +118,16 @@ class TypeManager:
         return d
 
 
+    def add_raw_type(self, name, raw_type):
+        '''Add raw type to schema
+        This is pretty lame, but I need patternProperties, and I don't 
+        really know how best to handle this and below in a general manner.
+        '''
+        self._schema['definitions'][name] = raw_type
+        self._schema['properties'][name] = {'$ref':
+                                            '#/definitions/{}'.format(name)}
+
+
     def define_type(self, name, properties, base=None):
         '''Define a new type
         Allow for new types of values to be created and inserted into the
@@ -155,4 +165,4 @@ class TypeManager:
 
         # Add the type to the properties dict
         self._schema['properties'][name] = {'$ref':
-            '#/definitions/{}'.format(name)}
+                                            '#/definitions/{}'.format(name)}
