@@ -8,7 +8,63 @@ import sys
 
 from sphinx.plugin import BasePlugin
 
+# Turn in_file into pipeline file:
+# First:
+#  Read the read section's files.
+#  e.g., diel_x_map = read_file(x) ...
+#        diel_map = process_diel(diel_x_map, diel_y_map, etc.)
+#
+# Second:
+#  Pass data to solver
 
+
+# def define_types(tm):
+
+#     tm.define_type('charge_file',{})
+#     tm.define_type('diel_files', {})
+#     tm.define_type(...)
+
+
+#     tm.define_type('in_file' {
+#         'type': 'object',
+#         'properties': {
+#             'charge_file': {
+#                 'type': 'object',
+#                 'properties': {
+#                     'format':,
+#                     'file'
+
+#                 }
+#             },
+#             'diel_files': {
+#                 'type': 'object',
+#                 'properties': {
+#                     'format':,
+#                     'x_file':,
+#                     'y_file':,
+#                     'z_file':
+
+#                 }
+#             }
+
+#             'read': {
+#                 'type': 'object',
+#                 'properties': {
+#                     'file_type': # can be 'charge', 'diel', 'kappa', etc.,
+#                     'format': # gz or dx
+#                     'files': # an array
+#                 }
+#             },
+#             'calcs': {
+#                 'type': 'object',
+#                 'properties': {}
+#             },
+#             'prints': {
+#                 'type': 'object',
+#                 'properties': {}
+#             }
+#         }
+#     })
 
 
 
@@ -17,8 +73,7 @@ class ParseIn(BasePlugin):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        _data = {}
-        #self._data = {'reads':[], 'calc': [], 'prints'}
+        self._data = None
 
     @classmethod
     def script_name(cls):
@@ -30,60 +85,41 @@ class ParseIn(BasePlugin):
 
     @classmethod
     def sources(cls):
-        return['in_file', 'text']
-
-
-
+        return['in_file', 'text', 'pipeline_file']
 
 
     @asyncio.coroutine
     def run(self):
-
+        infile = []
+        # Store all lines of the infile before doing anything.
         while True:
             data = yield from self.read_data()
             if data:
-                result = []
                 for line in data['text']['lines']:
-                    # ex = ''
-                    # ex +=line
-                    result.append(line)
-
+                    infile.append(line)
 
             else:
                 break
 
+        # Parse the stored infile.
+        dec = TextDecoder()
+        dec.feed(infile)
+        self._data = dec.parse()
 
-            dec = TextDecoder()
-            dec.feed(result)
-            enc = TextEncoder()
-            self._data = {enc.encode(dec.parse())}
+        print(self._data.reads)
 
-
-            yield from self.publish(self._data)
-
-
-
+        # Propigate the infile to the next plugin.
+        yield from self.publish(self._data)
         yield from self.done()
-
-
-
 
 
     def xform_data(self, data, to_type):
 
-        # if to_type == 'text':
-        #     lines = data.splitlines()
-        #
-        #     result = []
-        #     for x in lines:
-        #         data = ''
-        #         data += x
-        #
-        #
-        #         result.append(data)
-
-
-        #return self._tm.new_text(lines=str(data))
-
         if to_type == 'text':
             return self._tm.new_text(lines=[str(data)])
+
+        elif to_type == 'in_file':
+
+            infile_dict = {'read': {}, 'calcs': {}, 'prints': {}}
+
+            return self._tm.new_in_file(infile_dict)
