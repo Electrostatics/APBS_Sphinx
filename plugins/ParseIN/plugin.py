@@ -1,7 +1,7 @@
-from plugins.MariaParser.apbs.parser.__init__ import TextEncoder
-from plugins.MariaParser.apbs.parser.__init__ import TextDecoder
-from plugins.MariaParser.apbs.parser.__init__ import JSONEncoder
-from plugins.MariaParser.apbs.parser.__init__ import CalcInput
+from plugins.ParseIN.apbs.parser.__init__ import TextEncoder
+from plugins.ParseIN.apbs.parser.__init__ import TextDecoder
+from plugins.ParseIN.apbs.parser.__init__ import JSONEncoder
+from plugins.ParseIN.apbs.parser.__init__ import CalcInput
 import json
 import asyncio
 import sys
