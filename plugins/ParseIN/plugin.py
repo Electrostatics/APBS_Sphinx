@@ -6,6 +6,8 @@ import json
 import asyncio
 import sys
 
+from sphinx.plugin import BasePlugin
+
 # from apbs import parser
 # import apbs.calculation
 
@@ -67,7 +69,7 @@ import sys
 #         }
 #     })
 
-from sphinx.plugin import BasePlugin
+
 
 
 
