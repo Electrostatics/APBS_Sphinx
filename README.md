@@ -5,18 +5,27 @@ This is still very much in the prototype phase.  Beyond here there be monsters!
 First off, you'll need Python 3.4.3.  Python 3.4.x may work just as well, but I haven't tried.  You'll also need a C++11 compiler and CMake (3.2.x).
 
 ### Install Python Virtual Environment, install dependencies and generate JSON schema from PDBx/mmCIF star file
-1. `cd <sphinx_repo>/prototype`
-2. `python3 bootstrap.py`
-3. `source sphinx-env/bin/activate`
+1. `cd <sphinx_repo>`
+2. `git submodule init`
+3. `git submodule update`
+4. `python3 bootstrap.py`
+5. `source sphinx-env/bin/activate`
 
 ### Build the Geometric Flow plugin
-7. `cd <sphinx_repo>/prototype/plugins/Geoflow/src`
+7. `cd <sphinx_repo>/plugins/Geoflow/src`
 7. `mkdir build`
 7. `cd build`
 7. `cmake ..`
 7. `make`
 7. `cp geoflow.so ../..`
-*Check the README file in the Geoflow/src directory if building on Windows or OSX*
+
+### Build the Geometric Flow plugin
+7. `cd <sphinx_repo>/plugins/PB_S_AM/src`
+7. `mkdir build`
+7. `cd build`
+7. `cmake ..`
+7. `make pbam_sph`
+7. `cp /pbam/src/pbam_sph.so ../..`
 
 ## Testing the Beast
 We are currently using Nose to run the unit tests.  From the `prototype` directory just run `nosetests`.

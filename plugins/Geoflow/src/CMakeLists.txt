@@ -6,6 +6,14 @@ find_package(PythonInterp 3.4 REQUIRED)
 find_package(PythonInclude REQUIRED)
 find_package(Cython REQUIRED)
 
+if(APPLE)
+  list(APPEND CMAKE_MODULE_LINKER_FLAGS "-Wl,-undefined,dynamic_lookup")
+endif()
+if(WIN32)
+  list(APPEND CMAKE_MODULE_LINKER_FLAGS "/LIBPATH:C:\Python34\libs")
+endif()
+
+
 include_directories("${PYTHON_INCLUDE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
 
 add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/geoflow_py.c"
