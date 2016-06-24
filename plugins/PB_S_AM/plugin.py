@@ -55,10 +55,10 @@ def run_pbam(molecules):
     same process.
     '''
     # TODO: All of the following belong in a configuration file.
-    # It would assist the user
-    # with the meaning of the various values, as well as tracking, naming and
-    # locating the configs the user has created.
-    solver = PBAM_Solver(temp=300.0, epsilons=80.00, epsiloni=1.5)
+    solver = PBAM_Solver(runname='tst', runtype='electrostatics',
+                         temp=300.0, epsilons=80.00, 
+                         epsiloni=1.5, salt=0.01
+                         )
 
     result = solver.run_solv(molecules)
 
