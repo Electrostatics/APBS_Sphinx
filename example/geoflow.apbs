@@ -5,14 +5,14 @@
 # In addition, I think it would be useful to add something that can feed data from
 # here directly into a plugin.  Something like this:
 #  input = [{record}, {record}, ...]
-#  send(input).run_geoflow
+
 
 geo_output = (
     read_file(params['infile'])
-        .parse_xyzr()
-        .geoflow()
+        .parse_infiles()
+
 )
 
-geo_output.write_file(params['outfile'])
+
 
 geo_output.write_stdout()

@@ -43,7 +43,7 @@ import logging
 
 from sphinx.plugin import BasePlugin
 
-from .geoflow import Geoflow_Solver
+#from .geoflow import Geoflow_Solver
 
 __author__ = 'Keith T. Star <keith@pnnl.gov>'
 
@@ -131,4 +131,3 @@ class Geoflow(BasePlugin):
 
     def xform_data(self, data, to_type):
         return data
-

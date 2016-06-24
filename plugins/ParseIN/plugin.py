@@ -125,6 +125,8 @@ class ParseIN(BasePlugin):
         self._data = parser.parse()
         vars(parser.apbs_input)
 
+        #print (parser.name)
+        print (self._data.calcs[1].name)
 
 
         yield from self.publish(self._data)
