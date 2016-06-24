@@ -99,7 +99,7 @@ class PB_S_AM(BasePlugin):
                 data = yield from self.read_data()
                 if data:
                     value = data['apbs_atom']
-                    self._atoms.append({
+                    self._molecules.append({
                         'pos': (
                             value['Cartn_x'],
                             value['Cartn_y'],
@@ -113,7 +113,7 @@ class PB_S_AM(BasePlugin):
 
             # Run Geoflow in a separate process
             result = yield from self.runner.run_as_process(run_pbam,
-                    {'atoms': self._atoms})
+                    {'atoms': self._molecules})
 
             yield from self.publish(self._tm.new_text(lines=[str(result)]))
 
