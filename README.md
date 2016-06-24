@@ -23,7 +23,7 @@ First off, you'll need Python 3.4.3.  Python 3.4.x may work just as well, but I 
 7. `cd <sphinx_repo>/plugins/PB_S_AM/src`
 7. `mkdir build`
 7. `cd build`
-7. `cmake ..`
+7. `cmake -DENABLE_PBAM_SPHINX=ON ..`
 7. `make pbam_sph`
 7. `cp ./pbam/src/pbam_sph.so ../..`
 
