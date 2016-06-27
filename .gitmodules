@@ -1,3 +1,4 @@
 [submodule "plugins/PB_S_AM/src"]
 	path = plugins/PB_S_AM/src
-	url = https://github.com/davas301/pb_solvers
+  	url = https://github.com/davas301/pb_solvers
+    branch = master
