@@ -1,0 +1,2 @@
+To test this code, build it in a separate build dir (using cmake) and
+then run from the examples directory (so it can find all the data files).
