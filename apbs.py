@@ -92,9 +92,12 @@ def main():
         # Get files from the command line
         debug, cmd, args = parse_args()
 
+        if debug:
+            logging.basicConfig(level=logging.DEBUG)
+
         # Create, and start the "Coordinator"
         coordinator = Coordinator(PLUGIN_DIR)
-        coordinator.start(cmd, args)
+        coordinator.start(cmd, args, debug=debug)
 
     except Exception as e:
         coordinator.stop()

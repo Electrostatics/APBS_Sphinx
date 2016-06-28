@@ -66,7 +66,8 @@ class Coordinator:
         self._tasks = []
 
 
-    def start(self, cmd_file, cmd_args):
+        
+    def start(self, cmd_file, cmd_args, debug = False):
         '''Main entry point -- post constructor.
         cmd_file is the command file to process
         cmd_args are the arguments for the cmd file
@@ -77,6 +78,8 @@ class Coordinator:
             asyncio.set_event_loop(self._loop)
         else:
             self._loop = asyncio.get_event_loop()
+
+        self._loop.set_debug(debug)
 
         self._executor = ProcessPoolExecutor()
         self._loop.set_default_executor(self._executor)
