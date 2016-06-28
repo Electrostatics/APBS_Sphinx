@@ -55,7 +55,7 @@ def run_pbam(molecules):
     same process.
     '''
     # TODO: All of the following belong in a configuration file.
-    solver = PBAM_Solver(runname='tst', runtype='electrostatics',
+    solver = PBAM_Solver(runname='tst', runtype='energyforce',
                          temp=300.0, epsilons=80.00, 
                          epsiloni=1.5, salt=0.01
                          )
