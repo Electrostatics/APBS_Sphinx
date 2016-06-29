@@ -141,11 +141,12 @@ class Coordinator:
         This implementation is näive and just loads everything.  We can clearly
         do better.
         '''
-        
+
         for file in os.listdir(self._plugin_dir):
 
+            path = (os.path.join(self._plugin_dir, file))
 
-            if os.path.isdir(os.path.join(self._plugin_dir, file)):
+            if os.path.isdir(path):
                 # For now I'm thinking that we'll require the plug-in author to
                 # put their plug-in in a file called plugin.py, inside of a
                 # module that is named the same as their class implementation in
@@ -156,14 +157,17 @@ class Coordinator:
                 # in as needed by the user.  They would essentially be their own
                 # Python packages.
 
-                path = (os.path.join(self._plugin_dir, file))
 
+
+                # If the plugin folder doesn't have a plugin.py, instead of crashing
+                # that plugin will just be ignored.
                 for plug in os.listdir(path):
-                    if plug.startswith('plugin'):
+                    if plug.startswith('plugin.py'):
                         module = import_module(self._plugin_dir + '.' + file + '.plugin')
                         # Plugins need to be able to define new types.  This is one way
                         # to do it.  I'm not certain that it's the best way, but it's
                         # ok for now.
+
                         try:
                             types = getattr(module, 'define_types')
                             types(self._databus._typemgr)
