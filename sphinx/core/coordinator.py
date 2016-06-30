@@ -144,7 +144,7 @@ class Coordinator:
 
         for file in os.listdir(self._plugin_dir):
 
-            path = (os.path.join(self._plugin_dir, file))
+            path = os.path.join(self._plugin_dir, file)
 
             if os.path.isdir(path):
                 # For now I'm thinking that we'll require the plug-in author to
@@ -162,7 +162,7 @@ class Coordinator:
                 # If the plugin folder doesn't have a plugin.py, instead of crashing
                 # that plugin will just be ignored.
                 for plug in os.listdir(path):
-                    if plug.startswith('plugin.py'):
+                    if plug == 'plugin.py':
                         module = import_module(self._plugin_dir + '.' + file + '.plugin')
                         # Plugins need to be able to define new types.  This is one way
                         # to do it.  I'm not certain that it's the best way, but it's
@@ -188,6 +188,3 @@ class Coordinator:
                         # this class instance.
                         self._plugin_funcs[plugin.script_name()] = partial(plugin,
                             runner = self, plugins = self._plugin_funcs)
-
-                    else:
-                        pass
