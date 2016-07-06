@@ -1,4 +1,4 @@
 # Run PDB2PQR
 #
 
-pdb2pqr(params['pdb'], params['output'], params['ff'])
+pdb2pqr(params['pdb'], params['ff']).write_file(params['output'])

@@ -609,7 +609,7 @@ def mainCommand(argv):
 
     commandLine = ' '.join(argv[1:])
 
-    if len(args) != 2:
+    if len(args) != 1:
         parser.error('Incorrect number (%d) of arguments!\nargs: %s' % (len(args), args))
 
     if options.assign_only or options.clean:
@@ -697,8 +697,8 @@ Please cite your use of PDB2PQR as:
         print("Warning: %s is a non-standard PDB file.\n" % path)
         print(errlist)
 
-    outpath = args[1]
-    options.outname = outpath
+    # outpath = args[1]
+    # options.outname = outpath
 
     #In case no extensions were specified or no extensions exist.
     if not hasattr(options, 'active_extensions' ) or options.active_extensions is None:
@@ -715,7 +715,7 @@ Please cite your use of PDB2PQR as:
     try:
         header, lines, missedligands = runPDB2PQR(pdblist,
                                                   options.ff,
-                                                  outname = options.outname,
+                                                  # outname = options.outname,
                                                   ph = options.ph,
                                                   verbose = options.verbose,
                                                   selectedExtensions = options.active_extensions,
@@ -742,20 +742,22 @@ Please cite your use of PDB2PQR as:
         sys.exit(2)
 
     # Print the PQR file
-    outfile = open(outpath,"w")
-    outfile.write(header)
-    # Adding whitespaces if --whitespace is in the options
+    pqr = header
+
+    # # Adding whitespaces if --whitespace is in the options
     for line in lines:
         if options.whitespace:
             if line[0:4] == 'ATOM':
                 newline = line[0:6] + ' ' + line[6:16] + ' ' + line[16:38] + ' ' + line[38:46] + ' ' + line[46:]
-                outfile.write(newline)
+                pqr += newline
+
             elif line[0:6] == 'HETATM':
                 newline = line[0:6] + ' ' + line[6:16] + ' ' + line[16:38] + ' ' + line[38:46] + ' ' + line[46:]
-                outfile.write(newline)
+                pqr += newline
+
         else:
-            outfile.write(line)
-    outfile.close()
+            pqr += line
+
 
     if options.input:
         from .src import inputgen
@@ -768,6 +770,8 @@ Please cite your use of PDB2PQR as:
         input = inputgen.Input(outpath, size, method, async, potdx=True)
         input.printInputFiles()
         input.dumpPickle()
+
+    return pqr
 
 
 if __name__ == "__main__":

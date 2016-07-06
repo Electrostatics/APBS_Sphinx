@@ -51,11 +51,10 @@ _log = logging.getLogger()
 class PDB2PQR(BasePlugin):
     '''Stuff PDB2PQR into Sphnx
     '''
-    def __init__(self, pdb_name, output, ff, **kwargs):
+    def __init__(self, pdb_name, ff, **kwargs):
         super().__init__(**kwargs)
 
         self._pdb = pdb_name
-        self._out = output
         self._ff = ff
 
         _log.info("PDB2PQR plug-in initialized.")
@@ -78,7 +77,9 @@ class PDB2PQR(BasePlugin):
 
     @asyncio.coroutine
     def run(self):
-        mainCommand(['pdb2pqr-sphinx', '--ff={}'.format(self._ff), self._pdb, self._out])
+        pqr = mainCommand(['pdb2pqr-sphinx', '--ff={}'.format(self._ff), self._pdb])
+
+        yield from self.publish(self._tm.new_text({'lines': pqr.split('\n')}))
         yield from self.done()
 
 
