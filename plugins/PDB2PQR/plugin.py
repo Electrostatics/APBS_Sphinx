@@ -38,7 +38,7 @@
 # THE POSSIBILITY OF SUCH DAMAGE.
 #}}}
 
-import asyncio
+#import asyncio
 import logging
 
 from sphinx.plugin import BasePlugin
@@ -51,11 +51,15 @@ _log = logging.getLogger()
 class PDB2PQR(BasePlugin):
     '''Stuff PDB2PQR into Sphnx
     '''
-    def __init__(self, pdb_name, ff, **kwargs):
+    def __init__(self, pdb=None, opts={}, **kwargs):
         super().__init__(**kwargs)
 
-        self._pdb = pdb_name
-        self._ff = ff
+        print(pdb, opts)
+
+        self._pdb = pdb
+        self._ff = opts['ff']
+
+        print(self._pdb, self._ff)
 
         _log.info("PDB2PQR plug-in initialized.")
 
@@ -75,12 +79,11 @@ class PDB2PQR(BasePlugin):
         return ['text']
 
 
-    @asyncio.coroutine
-    def run(self):
-        pqr = mainCommand(['pdb2pqr-sphinx', '--ff={}'.format(self._ff), self._pdb])
+    async def run(self):
+        pqr = mainCommand(['pdb2pqr-sphinx', '-v', '--ff={}'.format(self._ff), self._pdb])
 
-        yield from self.publish(self._tm.new_text({'lines': pqr.split('\n')}))
-        yield from self.done()
+        await self.publish(self._tm.new_text({'lines': pqr.split('\n')}))
+        await self.done()
 
 
     def xform_data(self, data, to_type):

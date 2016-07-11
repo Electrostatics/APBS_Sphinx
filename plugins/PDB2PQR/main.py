@@ -697,9 +697,6 @@ Please cite your use of PDB2PQR as:
         print("Warning: %s is a non-standard PDB file.\n" % path)
         print(errlist)
 
-    # outpath = args[1]
-    # options.outname = outpath
-
     #In case no extensions were specified or no extensions exist.
     if not hasattr(options, 'active_extensions' ) or options.active_extensions is None:
         options.active_extensions = []
