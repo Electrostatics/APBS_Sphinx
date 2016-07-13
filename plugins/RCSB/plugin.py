@@ -4,21 +4,18 @@ import os, urllib
 import urllib.request
 
 from sphinx.plugin import BasePlugin
-#from .pdb import *
-
-
 
 _log = logging.getLogger()
 
-
+LINE_COUNT = 100
 
 class RCSB(BasePlugin):
     '''Plugin for parsing PDB files.
     '''
-    def __init__(self, **kwargs):
+    def __init__(self, file, **kwargs):
         super().__init__(**kwargs)
 
-        self._data = None
+        self.path = file
 
         _log.info("RCSB plug-in initialized.")
 
@@ -35,41 +32,33 @@ class RCSB(BasePlugin):
 
     @classmethod
     def sources(cls):
-        return ['pdb_file', 'text']
+        return ['text']
+
 
 
     @asyncio.coroutine
     def run(self):
-        while True:
-            file = None
-            data = yield from self.read_data()
-            if data:
-                #_data = None
-                #file = None
-                for path in data['text']['lines']:
-                    #_data = None
-                    #file = None
-                        #Doesn't work on Safari, need to use chrome
-                    URLpath = "http://www.rcsb.org/pdb/cgi/export.cgi/" + path + \
-                                  ".pdb?format=PDB&pdbId=" + path + "&compression=None"
-                    print (URLpath)
-                    try:
-                        file = urllib.request.urlopen(URLpath)
 
-                        if file.getcode() != 200 or 'nosuchfile' in file.geturl() :
-                            raise IOError
+        path = self.path
+        URLpath = "http://www.rcsb.org/pdb/cgi/export.cgi/" + path + \
+                                      ".pdb?format=PDB&pdbId=" + path + "&compression=None"
+        file = urllib.request.urlopen(URLpath)
 
-                    except IOError:
-                        print ("Error")
-                        return None
+        if file.getcode() != 200 or 'nosuchfile' in file.geturl() :
+            print ("Error")
+            #Not sure how this error should be handled
 
-                objects.append(file)
-            print (objects)
 
-            self._data = file
-            yield from self.publish((self._data))
-            yield from self.done()
+        reads = file.read()
 
+        s = reads.decode('utf-8')
+        lines = s.split('\n')
+        data = self._tm.new_text(lines=lines)
+
+        yield from self.publish((data))
+
+        yield from self.done()
 
     def xform_data(self, data, to_type):
+
         return data
