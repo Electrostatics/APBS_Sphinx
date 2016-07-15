@@ -1,4 +1,3 @@
-import asyncio
 import logging
 import os, urllib
 import urllib.request
@@ -7,15 +6,14 @@ from sphinx.plugin import BasePlugin
 
 _log = logging.getLogger()
 
-LINE_COUNT = 100
 
 class RCSB(BasePlugin):
-    '''Plugin for parsing PDB files.
+    '''Plugin for fetching proteins from RCSB database.
     '''
     def __init__(self, file, **kwargs):
         super().__init__(**kwargs)
 
-        self.path = file
+        self.protein = file
 
         _log.info("RCSB plug-in initialized.")
 
@@ -36,29 +34,29 @@ class RCSB(BasePlugin):
 
 
 
-    @asyncio.coroutine
-    def run(self):
+    async def run(self):
 
-        path = self.path
-        URLpath = "http://www.rcsb.org/pdb/cgi/export.cgi/" + path + \
-                                      ".pdb?format=PDB&pdbId=" + path + "&compression=None"
+        protein = self.protein
+        URLpath = "http://www.rcsb.org/pdb/cgi/export.cgi/" + protein + \
+                                      ".pdb?format=PDB&pdbId=" + protein + "&compression=None"
         file = urllib.request.urlopen(URLpath)
 
         if file.getcode() != 200 or 'nosuchfile' in file.geturl() :
-            print ("Error")
+            err = "{} does not exist, or is not available".format(protein)
+            _log.error(err)
+            raise PDBDoesntExist(err)
             #Not sure how this error should be handled
 
 
         reads = file.read()
-
         s = reads.decode('utf-8')
         lines = s.split('\n')
         data = self._tm.new_text(lines=lines)
-
-        yield from self.publish((data))
-
-        yield from self.done()
+        await self.publish((data))
+        await self.done()
 
     def xform_data(self, data, to_type):
-
         return data
+
+class PDBDoesntExist(Exception):
+    pass
