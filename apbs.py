@@ -45,6 +45,7 @@ import os
 import logging
 import argparse
 import asyncio
+import warnings
 
 from sphinx.core import Coordinator
 

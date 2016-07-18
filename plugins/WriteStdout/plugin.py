@@ -74,10 +74,9 @@ class WriteStdout(BasePlugin):
         return ['text']
 
 
-    @asyncio.coroutine
-    def run(self):
+    async def run(self):
         while True:
-            data = yield from self.read_data()
+            data = await self.read_data()
             if data:
                 for value in data['text']['lines']:
                     sys.stdout.write(str(value) + '\n')

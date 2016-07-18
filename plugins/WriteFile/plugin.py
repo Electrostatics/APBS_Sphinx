@@ -74,12 +74,11 @@ class WriteFile(BasePlugin):
         return ['file']
 
 
-    @asyncio.coroutine
-    def run(self):
+    async def run(self):
         _log.info("WriteFile started")
         with open(self._file, 'w') as file:
             while True:
-                data = yield from self.read_data()
+                data = await self.read_data()
                 if data:
                     for value in data['text']['lines']:
                         file.write(str(value) + '\n')

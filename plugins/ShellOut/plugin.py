@@ -66,15 +66,14 @@ class ShellOut(BasePlugin):
         return ['text']
 
 
-    @asyncio.coroutine
-    def run(self):
+    async def run(self):
         '''In this example we are starting another process via the shell.
         Again, as with the server example, we need to return the result of
         creating the Task.
         '''
-        self._process = yield from asyncio.create_subprocess_shell('ls -l',
+        self._process = await asyncio.create_subprocess_shell('ls -l',
             stdout=asyncio.subprocess.PIPE)
-        self._process_output, _ = yield from self._process.communicate()
+        self._process_output, _ = await self._process.communicate()
 
         return self._process
 
