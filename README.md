@@ -1,4 +1,4 @@
-# Sphinx Prototype
+# Sphinx Prototype ![Build Status](https://api.travis-ci.org/Electrostatics/APBS_Sphinx.svg?branch=develop)
 This is still very much in the prototype phase.  Beyond here there be monsters!
 
 ## Building the Beast
