@@ -130,8 +130,7 @@ class ParsePDB(BasePlugin):
                 break
 
         # We need to wait until the entire PDB file is read before we can publish.
-        self._tm.new_pdb_file(self._pdb)
-        yield from self.publish((self._pdb))
+        yield from self.publish(self._pdb)
         yield from self.done()
 
 
@@ -142,12 +141,12 @@ class ParsePDB(BasePlugin):
             return self._tm.new_pdb(data)
 
         elif to_type == 'text':
-            lines = ['id: ' + data['idCode'] + '\n']
+            lines = ['id: ' + data['idCode']]
             for a in data['atoms']:
                 atom = ''
                 for x, y in a.items():
                     atom += x + ': ' + str(y) + '\t'
 
-                lines.append(atom + '\n')
+                lines.append(atom)
 
             return self._tm.new_text(lines=lines)

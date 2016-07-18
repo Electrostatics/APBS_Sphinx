@@ -55,7 +55,7 @@ class ParseXYZR(BasePlugin):
     '''
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        _data = {}
+        self._data = {}
 
         _log.info("ParseXYZR plug-in initialized.")
 

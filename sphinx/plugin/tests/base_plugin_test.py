@@ -99,6 +99,9 @@ class SourcePlugin(BasePlugin):
     def run(self):
         pass
 
+    def xform_data(self, data, to_type):
+        pass
+
 
 class SinkPlugin(BasePlugin):
     def __init_(self, **kwargs):
@@ -109,4 +112,7 @@ class SinkPlugin(BasePlugin):
         return ['a_number']
 
     def run(self):
+        pass
+
+    def xform_data(self, data, to_type):
         pass

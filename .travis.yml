@@ -1,0 +1,13 @@
+language: python
+python:
+    - 3.4
+    - 3.5
+    - 3.5-dev
+    - nightly
+    
+install:
+    - pip install -r packages.txt
+    - python -m sphinx.bootstrap
+
+script:
+    - nosetests

@@ -105,18 +105,20 @@ class Geoflow(BasePlugin):
             while True:
                 data = yield from self.read_data()
                 if data:
-                    value = data['apbs_atom']
-                    self._atoms.append({
-                        'pos': (
-                            value['Cartn_x'],
-                            value['Cartn_y'],
-                            value['Cartn_z']
-                        ),
-                        'radius': value['radius'],
-                        'charge': value['charge']
-                    })
-                else:
-                    break
+                    for list in data:
+                        value = data[list]
+                        self._atoms.append({
+                            'pos': (
+                                value['Cartn_x'],
+                                value['Cartn_y'],
+                                value['Cartn_z']
+                            ),
+                            'radius': value['radius'],
+                            'charge': value['charge']
+                            })
+
+                    else:
+                        break
 
             # Run Geoflow in a separate process
             result = yield from self.runner.run_as_process(run_geoflow,
@@ -131,4 +133,3 @@ class Geoflow(BasePlugin):
 
     def xform_data(self, data, to_type):
         return data
-
