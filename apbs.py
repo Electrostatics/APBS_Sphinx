@@ -45,6 +45,7 @@ import os
 import logging
 import argparse
 import asyncio
+import warnings
 
 from sphinx.core import Coordinator
 
@@ -56,7 +57,6 @@ __author__ = 'Keith T. Star <keith@pnnl.gov>'
 # convinced that we shouldn't.
 logging.basicConfig(filename='io.mc', level=logging.INFO,
     format='%(asctime)s %(message)s')
-
 # TODO: log errors to stderr.
 _log = logging.getLogger(os.path.basename(sys.argv[0]))
 
@@ -94,11 +94,11 @@ def main():
 
         if debug:
             logging.basicConfig(level=logging.DEBUG)
+            warnings.simplefilter('default', ResourceWarning)
 
         # Create, and start the "Coordinator"
         coordinator = Coordinator(PLUGIN_DIR)
         coordinator.start(cmd, args, debug=debug)
-
     except Exception as e:
         coordinator.stop()
         _log.exception('Unhandled exception:')
