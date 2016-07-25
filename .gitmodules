@@ -1,0 +1,3 @@
+[submodule "plugins/TABIPB/src"]
+	path = plugins/TABIPB/src
+	url = https://github.com/lwwilson1/TABIPB.git
