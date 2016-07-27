@@ -63,7 +63,7 @@ def define_types(tm):
                            'items': {'type': 'string'}
                        }
                    })
-        
+
 
 LINE_COUNT = 100
 
@@ -88,7 +88,7 @@ class ReadFile(BasePlugin):
     @classmethod
     def sinks(cls):
         return ['file']
-    
+
 
     @classmethod
     def sources(cls):
@@ -97,45 +97,41 @@ class ReadFile(BasePlugin):
 
     # I don't know that these are necessary, so much as they may prove to be
     # pedagogical.
-    @asyncio.coroutine
-    def open(self):
+    async def open(self):
         return open(self._file, 'r')
 
-    @asyncio.coroutine
-    def read_lines(self, file):
+    async def read_lines(self, file):
         lines = []
         for c in range(LINE_COUNT):
             line = file.readline()
 
             if line == "":
                 break
-            
+
             lines.append(line)
 
         return lines
 
 
-    @asyncio.coroutine
-    def run(self):
+    async def run(self):
         # Note that we are opening and reading the file asynchronously.
-        file = yield from self.open()
-        lines = yield from self.read_lines(file)
+        file = await self.open()
+        lines = await self.read_lines(file)
 
         while lines:
             data = self._tm.new_text({'lines': lines})
-            yield from self.publish(data)
+            await self.publish(data)
 
             # This sleep allows subsequent plugins to start doing their
             # thing.
-            yield from asyncio.sleep(0)
-            
-            lines = yield from self.read_lines(file)
+            await asyncio.sleep(0)
+
+            lines = await self.read_lines(file)
 
 
-        yield from self.done()
+        await self.done()
         file.close()
 
 
     def xform_data(self, data, to_type):
         return data
- 

@@ -66,7 +66,7 @@ class Coordinator:
         self._tasks = []
 
 
-        
+
     def start(self, cmd_file, cmd_args, debug = False):
         '''Main entry point -- post constructor.
         cmd_file is the command file to process
@@ -119,10 +119,10 @@ class Coordinator:
         _log.info("The run loop is shut down.")
 
 
-    @asyncio.coroutine
-    def run_as_process(self, func, args):
+
+    async def run_as_process(self, func, args):
         try:
-            results = yield from self._loop.run_in_executor(self._executor, func,
+            results = await self._loop.run_in_executor(self._executor, func,
                     args)
         except:
             _log.info("We encountered an exception.  Goodbye.")
@@ -146,7 +146,6 @@ class Coordinator:
         '''
 
         for file in os.listdir(self._plugin_dir):
-
             path = os.path.join(self._plugin_dir, file)
 
             if os.path.isdir(path):
@@ -159,35 +158,34 @@ class Coordinator:
                 # This allows them to be maintained in different repos, and pulled
                 # in as needed by the user.  They would essentially be their own
                 # Python packages.
+                try:
+                    module = import_module(self._plugin_dir + '.' + file + '.plugin')
 
+                    # Plugins need to be able to define new types.  This is one way
+                    # to do it.  I'm not certain that it's the best way, but it's
+                    # ok for now.
+                    
+                    try:
+                        types = getattr(module, 'define_types')
+                        types(self._databus._typemgr)
+                        
+                    except AttributeError:
+                        pass
+                    
+                    
+                    plugin = getattr(module, file)
+                    self._plugins[file] = plugin
+                    self._databus.add_plugin(plugin)
+                    
+                    # TODO: This is pretty lame, but it's a quick and dirty way to
+                    # see how this python-as-input-script-thing is going to work out.
+                    # For those of you just catching up, _plugin_funcs is a dict that
+                    # maps from input-script level keywords to the plugin that does
+                    # the work.  Below we partially apply the constructor to work with
+                    # this class instance.
+                    self._plugin_funcs[plugin.script_name()] = partial(plugin,
+                                                                       runner = self,
+                                                                       plugins = self._plugin_funcs)
 
-
-                # If the plugin folder doesn't have a plugin.py, instead of crashing
-                # that plugin will just be ignored.
-                for plug in os.listdir(path):
-                    if plug == 'plugin.py':
-                        module = import_module(self._plugin_dir + '.' + file + '.plugin')
-                        # Plugins need to be able to define new types.  This is one way
-                        # to do it.  I'm not certain that it's the best way, but it's
-                        # ok for now.
-
-                        try:
-                            types = getattr(module, 'define_types')
-                            types(self._databus._typemgr)
-
-                        except AttributeError:
-                            pass
-
-
-                        plugin = getattr(module, file)
-                        self._plugins[file] = plugin
-                        self._databus.add_plugin(plugin)
-
-                        # TODO: This is pretty lame, but it's a quick and dirty way to
-                        # see how this python-as-input-script-thing is going to work out.
-                        # For those of you just catching up, _plugin_funcs is a dict that
-                        # maps from input-script level keywords to the plugin that does
-                        # the work.  Below we partially apply the constructor to work with
-                        # this class instance.
-                        self._plugin_funcs[plugin.script_name()] = partial(plugin,
-                            runner = self, plugins = self._plugin_funcs)
+                except ImportError:
+                    pass

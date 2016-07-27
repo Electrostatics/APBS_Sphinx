@@ -53,7 +53,7 @@ __author__ = 'Keith T. Star <keith@pnnl.gov>'
 _log = logging.getLogger()
 
 
-PDBx_mmCIF_SCHEMA = os.path.join(os.path.dirname(__file__), './PDBxmmCIF.json')
+PDBx_mmCIF_SCHEMA = os.path.join(os.path.dirname(__file__), 'PDBxmmCIF.json')
 
 class TypeManager:
     '''Type Manager

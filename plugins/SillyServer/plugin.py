@@ -75,14 +75,14 @@ class SillyServer(BasePlugin):
         return []
 
 
-    @asyncio.coroutine
-    def run(self):
+
+    async def run(self):
         '''Start the server
         In this context, we want to have a long running server, rather than
         processing some finite amount of data.  To get this to work we need to
         create a Server and return it.
         '''
-        self._server = yield from asyncio.start_server(self._connection,
+        self._server = await asyncio.start_server(self._connection,
             self._host, self._port, loop=self.runner._loop)
         return self._server
 
@@ -99,16 +99,16 @@ class SillyServer(BasePlugin):
         task.add_done_callback(connection_done)
 
 
-    @asyncio.coroutine
-    def _connection_handler(self, reader, writer):
+
+    async def _connection_handler(self, reader, writer):
         while True:
-            data = (yield from reader.readline()).decode('utf-8')
+            data = (await reader.readline()).decode('utf-8')
             if not data:
                 break
 
             print("client sent: {}".format(data))
 
-            yield from writer.drain()
+            await writer.drain()
 
 
     def xform_data(self, data, to_type):

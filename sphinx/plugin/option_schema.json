@@ -1,0 +1,118 @@
+{
+	"$schema": "http://json-schema.org/draft-04/schema#",
+
+	"title": "Plugin Options",
+	"description": "This is a schema that plugins use to describe options/parameters that they accept.",
+
+	"type": "array",
+	"items": {
+		"anyOf": [
+			{ "$ref": "#/definitions/option" },
+			{ "$ref": "#/definitions/option_group" }
+		]
+	},
+	"additionalItems": false,
+	"uniqueItems": true,
+	
+	"definitions": {
+		"option_group": {
+			"type": "object",
+			"oneOf": [
+				{ "required": ["one"] },
+				{ "required": ["all"] },
+				{ "required": ["any"] }
+			],
+			"properties": {
+				"one": {
+					"type": "object",
+					"required": [ "options" ],
+					"properties": {
+						"title": { "type": "string" },
+						"options": {
+							"type": "array",
+							"items": {
+								"anyOf": [
+									{ "$ref": "#/definitions/option" },
+									{ "$ref": "#/definitions/option_group" }
+								]
+							},
+							"Minitems": 2,
+							"uniqueItems": true,
+							"additionalItems": false
+						}
+					}
+				},
+				"all": {
+					"type": "object",
+					"required": [ "options" ],
+					"properties": {
+						"title": { "type": "string" },
+						"options": {
+							"type": "array",
+							"items": {
+								"anyOf": [
+									{ "$ref": "#/definitions/option" },
+									{ "$ref": "#/definitions/option_group" }
+								]
+							},
+							"minItems": 1,
+							"uniqueItems": true,
+							"additionalItems": false
+						}
+					}
+				},
+				"any": {
+					"type": "object",
+					"required": [ "options" ],
+					"properties": {
+						"title": { "type": "string" },
+						"options": {
+							"type": "array",
+							"items": {
+								"anyOf": [
+									{ "$ref": "#/definitions/option" },
+									{ "$ref": "#/definitions/option_group" }
+								]
+							},
+							"minItems": 1,
+							"uniqueItems": true,
+							"additionalItems": false
+						}
+					}
+				}
+			}
+		},
+		"opt_type": {
+			"type": "string",
+			"enum": [
+				"string",
+				"int",
+				"float",
+				"bool",
+				"enum"
+			]
+		},
+		"option": {
+			"type": "object",
+			"required": [
+				"name",
+				"var",
+				"type"
+			],
+			"properties": {
+				"name": { "type": "string" },
+				"var": { "type": "string" },
+				"type": { "$ref": "#/definitions/opt_type" },
+				"allowedValues": {
+					"type": "array",
+					"minItems": 1,
+					"uniqueItems": true,
+					"additionalItems": false
+				},
+				"description": { "type": "string" },
+				"misc": { "type": "object" }
+			},
+			"additionalProperties": false
+		}
+	}
+}

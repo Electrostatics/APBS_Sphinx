@@ -38,7 +38,6 @@
 # THE POSSIBILITY OF SUCH DAMAGE.
 #}}}
 
-import asyncio
 import logging
 
 from sphinx.plugin import BasePlugin
@@ -94,10 +93,9 @@ class ParseAMBER(BasePlugin):
         return ['text']
 
 
-    @asyncio.coroutine
-    def run(self):
+    async def run(self):
         while True:
-            data = yield from self.read_data()
+            data = await self.read_data()
             if data:
                 for line in data['text']['lines']:
                     if not line.startswith('#'):
@@ -114,8 +112,8 @@ class ParseAMBER(BasePlugin):
 
         # It's best to wait until the entire file is read.  We could work around
         # this, but it's just easier not to try.  These aren't very long anyway.
-        yield from self.publish(self._ff)
-        yield from self.done()
+        await self.publish(self._ff)
+        await self.done()
 
 
     def xform_data(self, data, to_type):
@@ -126,11 +124,11 @@ class ParseAMBER(BasePlugin):
             txt = []
             for residue, atoms in data.items():
                 txt.append(residue + ':')
-                
+
                 for atom, info in atoms.items():
                     txt.append('\t {}: charge {}, radius {}, group {}'.format(atom,
                                                                              info['charge'],
                                                                              info['radius'],
                                                                              info['group']))
-                    
+
             return self._tm.new_text(lines=txt)

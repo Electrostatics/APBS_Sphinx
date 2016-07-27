@@ -38,7 +38,6 @@
 # THE POSSIBILITY OF SUCH DAMAGE.
 #}}}
 
-import asyncio
 import logging
 
 from sphinx.plugin import BasePlugin
@@ -91,12 +90,11 @@ class PB_S_AM(BasePlugin):
         return ['text']
 
 
-    @asyncio.coroutine
-    def run(self):
+    async def run(self):
         try:
             # Collect all of the atoms that are available.
             while True:
-                data = yield from self.read_data()
+                data = await self.read_data()
                 if data:
                     value = data['apbs_atom']
                     self._molecules.append({
@@ -112,16 +110,15 @@ class PB_S_AM(BasePlugin):
                     break
 
             # Run Geoflow in a separate process
-            result = yield from self.runner.run_as_process(run_pbam,
+            result = await self.runner.run_as_process(run_pbam,
                     {'atoms': self._molecules})
 
-            yield from self.publish(self._tm.new_text(lines=[str(result)]))
+            await self.publish(self._tm.new_text(lines=[str(result)]))
 
-            yield from self.done()
+            await self.done()
         except Exception as e:
             _log.exception('Unhandled exception:')
 
 
     def xform_data(self, data, to_type):
         return data
-
