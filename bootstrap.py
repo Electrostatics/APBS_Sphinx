@@ -59,7 +59,7 @@ def bootstrap(dest = _ENV):
 
         def post_setup(self, context):
             ''' Deal with dependencies
-            
+
             Once we have our Python environment we have pip install the packages listed
             in packages.txt, and then we do any bootstrapping.
             '''
@@ -78,21 +78,21 @@ def bootstrap(dest = _ENV):
             cmd = [python, '-m', 'sphinx.bootstrap']
             subprocess.check_call(cmd)
 
-        
+
 
     sys.stdout.write("Creating Python virtual environment...\n")
     if os.name == 'nt':
         use_symlinks = False
     else:
         use_symlinks = True
-        
+
     builder = EnvBuilder(symlinks = use_symlinks, with_pip = True)
     builder.create(dest)
 
 
 def main(argv = sys.argv):
     ''' Install Python venv and bootstrap Sphinx
-    
+
     This script calls itself to bootstrap Sphinx once the virtual environment
     is setup.
     '''
@@ -103,9 +103,9 @@ def main(argv = sys.argv):
             os.path.basename(argv[0])))
         sys.exit(7)
 
-    # We need Python 3.4 for asyncio support
-    if sys.version_info < (3, 4):
-        sys.stderr.write("{}: error; Python > 3.4 is required.\n".format(
+    # We need Python 3.5 for asyncio support
+    if sys.version_info < (3, 5):
+        sys.stderr.write("{}: error; Python > 3.5 is required.\n".format(
             os.path.basename(argv[0])))
         sys.exit(6)
 

@@ -66,7 +66,7 @@ class Coordinator:
         self._tasks = []
 
 
-        
+
     def start(self, cmd_file, cmd_args, debug = False):
         '''Main entry point -- post constructor.
         cmd_file is the command file to process
@@ -119,10 +119,10 @@ class Coordinator:
         _log.info("The run loop is shut down.")
 
 
-    @asyncio.coroutine
-    def run_as_process(self, func, args):
+
+    async def run_as_process(self, func, args):
         try:
-            results = yield from self._loop.run_in_executor(self._executor, func,
+            results = await self._loop.run_in_executor(self._executor, func,
                     args)
         except:
             _log.info("We encountered an exception.  Goodbye.")

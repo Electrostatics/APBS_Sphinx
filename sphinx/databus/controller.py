@@ -38,7 +38,6 @@
 # THE POSSIBILITY OF SUCH DAMAGE.
 #}}}
 
-from asyncio import coroutine
 
 import logging
 
@@ -89,7 +88,7 @@ class SDBController:
         '''
         # TODO: Maybe check that the plugin hasn't already been registered?
         # Is this the correct place for that test?
-        
+
         _log.info('Registering plug-in "{}" '.format(plugin.__name__) +
             'with sources {} '.format(plugin.sources()) +
              'and sinks {}.'.format(plugin.sinks()))
@@ -120,12 +119,10 @@ class SDBController:
         return self._sink_types[type]
 
 
-    @coroutine
-    def publish(self, data, sink):
+    async def publish(self, data, sink):
         '''Publish to the databus
 
         Plugins will invoke this method to publish data to the databus, which
         will eventually be routed to the destination plugin(s).
         '''
-        yield from sink.write_data(data)
-
+        await sink.write_data(data)
