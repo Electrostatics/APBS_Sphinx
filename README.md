@@ -1,8 +1,8 @@
-# Sphinx Prototype ![Build Status](https://api.travis-ci.org/Electrostatics/APBS_Sphinx.svg?branch=develop)
-This is still very much in the prototype phase.  Beyond here there be monsters!
+# APBS Sphinx ![Build Status](https://api.travis-ci.org/Electrostatics/APBS_Sphinx.svg?branch=develop)
+This is still very much pre-alpha software.  Beyond here there be monsters!
 
 ## Building the Beast
-First off, you'll need Python 3.4.3.  Python 3.4.x may work just as well, but I haven't tried.  You'll also need a C++11 compiler and CMake (3.2.x).
+First off, you'll need Python 3.5, built with *venv* support.  Note that currently the Python 3.5 Ubuntu package is broken.  You'll also need a C++11 compiler and CMake (3.2.x).
 
 ### Install Python Virtual Environment, install dependencies and generate JSON schema from PDBx/mmCIF star file
 1. `cd <sphinx_repo>`
