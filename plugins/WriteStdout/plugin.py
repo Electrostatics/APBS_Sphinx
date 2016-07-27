@@ -38,7 +38,6 @@
 # THE POSSIBILITY OF SUCH DAMAGE.
 #}}}
 
-import asyncio
 import sys
 import logging
 import simplejson as json

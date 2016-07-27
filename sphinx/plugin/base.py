@@ -39,7 +39,7 @@
 #}}}
 
 from abc import ABCMeta, abstractmethod
-from asyncio import coroutine, Queue
+from asyncio import Queue
 import logging
 
 import simplejson as json
