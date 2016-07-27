@@ -40,6 +40,9 @@
 
 from abc import ABCMeta, abstractmethod
 from asyncio import coroutine, Queue
+from jsonschema import validate, ValidationError
+import os
+
 import logging
 
 import simplejson as json
@@ -50,6 +53,11 @@ __all__ = ['BasePlugin', 'ImpedenceMismatchError']
 __author__ = 'Keith T. Star <keith@pnnl.gov>'
 
 _log = logging.getLogger()
+
+OPTION_SCHEMA_FILE = os.path.join(os.path.dirname(__file__), 'option_schema.json')
+with open(OPTION_SCHEMA_FILE) as f:
+    _option_schema = json.loads(f.read())
+    
 
 class BasePlugin(metaclass=ABCMeta):
     '''Core plug-in functionality
@@ -65,7 +73,7 @@ class BasePlugin(metaclass=ABCMeta):
     # Type manager handle
     _tm = None
 
-    def __init__(self, runner, plugins, source = None):
+    def __init__(self, runner, plugins, source = None, opt_schema = None, options = None):
         '''Constructor
 
         This is how our plugin pipeline is constructed.  Each plugin instance
@@ -75,7 +83,6 @@ class BasePlugin(metaclass=ABCMeta):
         This method _must_ be called with the event loop from which it will be
         called in the future, e.g., asyncio.get_event_loop().
         '''
-
         # A dict that maps each destination for our data, to the type that the
         # destination can consume.
         self._sinks = {}
@@ -98,6 +105,22 @@ class BasePlugin(metaclass=ABCMeta):
 
         self.runner = runner
         self._plugins = plugins
+
+        # Set options on our subclass
+        if opt_schema:
+            if type(opt_schema) == str:
+                # Assume it's a file name
+                with open(opt_schema) as f:
+                    opt_schema = json.loads(f.read())
+
+            try:
+                validate(opt_schema, _option_schema)
+            except ValidationError:
+                _log.error('Plugin option validation error.')
+                raise
+
+            if options:
+                print(json.loads(options))
 
         # create_task schedules the execution of the coroutine "run", wrapped
         # in a future.
