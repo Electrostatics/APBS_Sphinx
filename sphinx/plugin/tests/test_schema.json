@@ -1,0 +1,147 @@
+[
+	{
+		"name": "Version",
+		"var": "version",
+		"misc": {
+			"cmd_opt": "--version"
+		},
+		"type": "bool",
+		"description": "Show the program's version and exit."
+	},
+	{
+		"name": "Help",
+		"var": "help",
+		"misc": {
+			"cmd_opt": "--help"
+		},
+		"type": "bool",
+		"description": "Show usage help and exit."
+	},
+	{
+		"all": {
+			"title": "Manditory Options",
+			"options": [
+				{
+					"one": {
+						"options": [
+							{
+								"name": "Force Field",
+								"var": "ff",
+								"misc": {
+									"cmd_opt": "--ff={}"
+								},
+								"type": "enum",
+								"allowedValues": [ "amber", "charm", "parse", "tyl06", "peoepb", "swanson" ],
+								"description": "The force field to use."
+							},
+							{
+								"all": {
+									"options": [
+										{
+											"name": "User Force Field",
+											"var": "userff",
+											"misc": {
+												"cmd_opt": "--userff={}"
+											},
+											"type": "string",
+											"description": "File containing a user created force field."
+										},
+										{
+											"name": "User names",
+											"var": "usernames",
+											"misc": {
+												"cmd_opt": "--usernames={}"
+											},
+											"type": "string",
+											"description": "File containing user created names."
+										}
+									]
+								}
+							},
+							{
+								"name": "Clean",
+								"var": "clean",
+								"misc": {
+									"cmd_opt": "--clean"
+								},
+								"type": "bool",
+								"description": "Simply return origital PDB file, properly aligned."
+							}
+						]
+					}
+				}
+			]
+		}
+	},
+	{
+		"any": {
+			"title": "General Options",
+			"options": [
+				{
+					"name": "No debump",
+					"var": "nodebump",
+					"misc": {
+						"cmd_opt": "--nodebump"
+					},
+					"type": "bool",
+					"description": "Do not perform debumping operation."
+				},
+				{
+					"name": "No H Optimization",
+					"var": "noopt",
+					"misc": {
+						"cmd_opt": "--noopt"
+					},
+					"type": "bool",
+					"description": "Do not perform Hydrogen optimization."
+				},
+				{
+					"name": "Chain ID's",
+					"var": "chain",
+					"misc": {
+						"cmd_opt": "--chain"
+					},
+					"type": "bool",
+					"description": "Keep chain ID's in output PQR."
+				},
+				{
+					"name": "Assign Only",
+					"var": "assign_only",
+					"misc": {
+						"cmd_opt": "--assign-only"
+					},
+					"type": "bool",
+					"description": ""
+				},
+				{
+					"name": "Use force field names",
+					"var": "ffout",
+					"misc": {
+						"cmd_opt": "--ffout"
+					},
+					"type": "enum",
+					"allowedValues": [ "amber", "charm", "parse", "tyl06", "peoepb", "swanson" ],
+					"description": "Use force field names for atom and residue names."
+				},
+				{
+					"name": "User names",
+					"var": "usernames",
+					"misc": {
+						"cmd_opt": "--usernames={}"
+					},
+					"type": "string",
+					"description": "File containing user created names."
+				},
+				{
+					"name": "APBS input file",
+					"var": "apbs_input",
+					"misc": {
+						"cmd_opt": "apbs-input"
+					},
+					"type": "bool",
+					"description": "Generate an APBS input file suitable for the generated PQR."
+				}
+			]	
+		}
+	}
+]

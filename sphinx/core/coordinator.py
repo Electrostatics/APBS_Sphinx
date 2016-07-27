@@ -144,8 +144,11 @@ class Coordinator:
         This implementation is näive and just loads everything.  We can clearly
         do better.
         '''
+
         for file in os.listdir(self._plugin_dir):
-            if os.path.isdir(os.path.join(self._plugin_dir, file)):
+            path = os.path.join(self._plugin_dir, file)
+
+            if os.path.isdir(path):
                 # For now I'm thinking that we'll require the plug-in author to
                 # put their plug-in in a file called plugin.py, inside of a
                 # module that is named the same as their class implementation in
@@ -155,28 +158,34 @@ class Coordinator:
                 # This allows them to be maintained in different repos, and pulled
                 # in as needed by the user.  They would essentially be their own
                 # Python packages.
-                module = import_module(self._plugin_dir + '.' + file + '.plugin')
-
-                # Plugins need to be able to define new types.  This is one way
-                # to do it.  I'm not certain that it's the best way, but it's
-                # ok for now.
                 try:
-                    types = getattr(module, 'define_types')
-                    types(self._databus._typemgr)
+                    module = import_module(self._plugin_dir + '.' + file + '.plugin')
 
-                except AttributeError:
-                    pass
+                    # Plugins need to be able to define new types.  This is one way
+                    # to do it.  I'm not certain that it's the best way, but it's
+                    # ok for now.
                     
-                
-                plugin = getattr(module, file)
-                self._plugins[file] = plugin
-                self._databus.add_plugin(plugin)
+                    try:
+                        types = getattr(module, 'define_types')
+                        types(self._databus._typemgr)
+                        
+                    except AttributeError:
+                        pass
+                    
+                    
+                    plugin = getattr(module, file)
+                    self._plugins[file] = plugin
+                    self._databus.add_plugin(plugin)
+                    
+                    # TODO: This is pretty lame, but it's a quick and dirty way to
+                    # see how this python-as-input-script-thing is going to work out.
+                    # For those of you just catching up, _plugin_funcs is a dict that
+                    # maps from input-script level keywords to the plugin that does
+                    # the work.  Below we partially apply the constructor to work with
+                    # this class instance.
+                    self._plugin_funcs[plugin.script_name()] = partial(plugin,
+                                                                       runner = self,
+                                                                       plugins = self._plugin_funcs)
 
-                # TODO: This is pretty lame, but it's a quick and dirty way to
-                # see how this python-as-input-script-thing is going to work out.
-                # For those of you just catching up, _plugin_funcs is a dict that
-                # maps from input-script level keywords to the plugin that does
-                # the work.  Below we partially apply the constructor to work with
-                # this class instance.
-                self._plugin_funcs[plugin.script_name()] = partial(plugin,
-                    runner = self, plugins = self._plugin_funcs)
+                except ImportError:
+                    pass

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*- {{{
 # vim: set fenc=utf-8 ft=python ff=unix sw=4 ts=4 sts=4 et:
+
 # APBS -- Adaptive Poisson-Boltzmann Solver
 #
 #  Nathan A. Baker (nathan.baker@pnnl.gov)
@@ -37,7 +38,3 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 # THE POSSIBILITY OF SUCH DAMAGE.
 #}}}
-
-from .base import *
-from .option_handler import *
-
