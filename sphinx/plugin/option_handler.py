@@ -65,11 +65,22 @@ _type_map = {'bool': bool,
 
 class OptionHandler():
     def __init__(self, schema):
-        if isinstance(schema,  str):
-            schema = json.loads(schema)
-
-        elif isinstance(schema, io.IOBase):
+        # Try it as a file object
+        try:
             schema = json.loads(schema.read())
+        except AttributeError:
+            # Try it as a file path
+            try:
+                with open(schema) as f:
+                    schema = json.loads(f.read())
+            except:
+                # Try it as a string
+                try:
+                    schema = json.loads(schema)
+                except TypeError:
+                    # It must be a Python object
+                    pass
+            
 
         try:
             validate(schema, _option_schema)
