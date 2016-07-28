@@ -27,6 +27,14 @@ First off, you'll need Python 3.5, built with *venv* support.  Note that current
 7. `make pbam_sph`
 7. `cp ./pbam/src/pbam_sph.so ../..`
 
+### Build the TABI-PB plugin
+7. `cd <sphinx_repo>/plugins/TABIPB/src`
+7. `mkdir build`
+7. `cd build`
+7. `cmake -DENABLE_TABIPB_SPHINX=ON ..`
+7. `make`
+7. `cp tabipb_sph.so ../..`
+
 ## Testing the Beast
 We are currently using Nose to run the unit tests.  From the `prototype` directory just run `nosetests`.
 
@@ -36,6 +44,9 @@ From `<sphinx_repo>` try this:
 
 Or this:
 `python apbs.py example/pbam/pbam.apbs infile=example/imidazole.xyzr outfile=pbam.txt`
+
+Or this:
+`python apbs.py example/tabipb.apbs infile=example/imidazole.xyzr outfile=pbam.txt`
 
 It just ran the geometric flow solver on *imidazole.xyzr* and printed some electrostatic information about the molecule into *imidazole.txt*.
 
