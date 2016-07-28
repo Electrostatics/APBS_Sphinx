@@ -39,7 +39,10 @@
 #}}}
 
 from abc import ABCMeta, abstractmethod
-from asyncio import coroutine, Queue
+from asyncio import Queue
+from jsonschema import validate, ValidationError
+import os
+
 import logging
 
 import simplejson as json
@@ -50,6 +53,11 @@ __all__ = ['BasePlugin', 'ImpedenceMismatchError']
 __author__ = 'Keith T. Star <keith@pnnl.gov>'
 
 _log = logging.getLogger()
+
+OPTION_SCHEMA_FILE = os.path.join(os.path.dirname(__file__), 'option_schema.json')
+with open(OPTION_SCHEMA_FILE) as f:
+    _option_schema = json.loads(f.read())
+    
 
 class BasePlugin(metaclass=ABCMeta):
     '''Core plug-in functionality
@@ -65,7 +73,7 @@ class BasePlugin(metaclass=ABCMeta):
     # Type manager handle
     _tm = None
 
-    def __init__(self, runner, plugins, source = None):
+    def __init__(self, runner, plugins, source = None, opt_schema = None, options = None):
         '''Constructor
 
         This is how our plugin pipeline is constructed.  Each plugin instance
@@ -75,7 +83,6 @@ class BasePlugin(metaclass=ABCMeta):
         This method _must_ be called with the event loop from which it will be
         called in the future, e.g., asyncio.get_event_loop().
         '''
-
         # A dict that maps each destination for our data, to the type that the
         # destination can consume.
         self._sinks = {}
@@ -87,7 +94,7 @@ class BasePlugin(metaclass=ABCMeta):
             sink_types = set(source.sources()).intersection(self.sinks())
             if len(sink_types):
                 source._set_sink(self, sink_types.pop())
-                
+
             else:
                 err = "{} cannot sink '{}'".format(self, source.sources())
                 _log.error(err)
@@ -98,6 +105,22 @@ class BasePlugin(metaclass=ABCMeta):
 
         self.runner = runner
         self._plugins = plugins
+
+        # Set options on our subclass
+        if opt_schema:
+            if type(opt_schema) == str:
+                # Assume it's a file name
+                with open(opt_schema) as f:
+                    opt_schema = json.loads(f.read())
+
+            try:
+                validate(opt_schema, _option_schema)
+            except ValidationError:
+                _log.error('Plugin option validation error.')
+                raise
+
+            if options:
+                print(json.loads(options))
 
         # create_task schedules the execution of the coroutine "run", wrapped
         # in a future.
@@ -124,10 +147,9 @@ class BasePlugin(metaclass=ABCMeta):
         output).
         '''
         self._sinks[sink] = data_type
-        
 
-    @coroutine
-    def publish(self, data):
+
+    async def publish(self, data):
         '''Publish data
 
         Called by a plugin to publish data to it's sinks.
@@ -137,40 +159,38 @@ class BasePlugin(metaclass=ABCMeta):
             # method below.
             if data:
                 data = self.xform_data(data, data_type)
-            yield from self._databus.publish(data, sink)
+            await self._databus.publish(data, sink)
 
 
-    @coroutine
-    def write_data(self, data):
+    async def write_data(self, data):
         '''Write data to queue
-        
+
         Called by the databus controller to enqueue data from our source.
         '''
-        yield from self._queue.put(data)
-        
+        await self._queue.put(data)
 
-    @coroutine
-    def read_data(self):
+
+    async def read_data(self):
         '''Read data from queue
 
         Called by plugins to get data from their sources.
         '''
-        payload = yield from self._queue.get()
+        payload = await self._queue.get()
         return payload
-        
 
-    @coroutine
-    def done(self):
+
+
+    async def done(self):
         '''The plugin is finished
 
         Called by a plugin to indicate to it's sinks that it has no more data.
         '''
         # TODO: It feels clumsy to use getting "None" as "EOT".  Also, it
         # requires that the plugins test for it to stop reading data.
-        yield from self.publish(None)
+        await self.publish(None)
 
 
-        
+
     # Sources and sinks, oh my!  These follow the current flow analogy.
     # Data flows from a source to a sink.  Our input comes from a source,
     # and we sink it, process the data in some manner, and then source
@@ -225,11 +245,11 @@ class BasePlugin(metaclass=ABCMeta):
         but also easily transformed.
         '''
         pass
-    
 
-    @coroutine
+
+
     @abstractmethod
-    def run(self):
+    async def run(self):
         '''Our main method where work happens
 
         This is the method that will be invoked when the plug-in needs to do
@@ -240,4 +260,3 @@ class BasePlugin(metaclass=ABCMeta):
 
 class ImpedenceMismatchError(Exception):
     pass
-    

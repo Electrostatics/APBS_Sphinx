@@ -38,7 +38,6 @@
 # THE POSSIBILITY OF SUCH DAMAGE.
 #}}}
 
-import asyncio
 import logging
 
 from sphinx.plugin import BasePlugin
@@ -55,7 +54,7 @@ class ParseXYZR(BasePlugin):
     '''
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        _data = {}
+        self._data = {}
 
         _log.info("ParseXYZR plug-in initialized.")
 
@@ -75,11 +74,10 @@ class ParseXYZR(BasePlugin):
         return ['apbs_atom', 'text']
 
 
-    @asyncio.coroutine
-    def run(self):
+    async def run(self):
         seq = 1
         while True:
-            data = yield from self.read_data()
+            data = await self.read_data()
             if data:
                 for line in data['text']['lines']:
                     x, y, z, r, c = line.split()
@@ -99,12 +97,12 @@ class ParseXYZR(BasePlugin):
                                   'charge': float(c)}
                     seq += 1
 
-                    yield from self.publish(self._data)
+                    await self.publish(self._data)
 
             else:
                 break
 
-        yield from self.done()
+        await self.done()
 
 
     def xform_data(self, data, to_type):

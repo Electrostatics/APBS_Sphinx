@@ -45,6 +45,7 @@ import os
 import logging
 import argparse
 import asyncio
+import warnings
 
 from sphinx.core import Coordinator
 
@@ -56,7 +57,6 @@ __author__ = 'Keith T. Star <keith@pnnl.gov>'
 # convinced that we shouldn't.
 logging.basicConfig(filename='io.mc', level=logging.INFO,
     format='%(asctime)s %(message)s')
-
 # TODO: log errors to stderr.
 _log = logging.getLogger(os.path.basename(sys.argv[0]))
 
@@ -68,16 +68,21 @@ def parse_args():
     and relegate options to the command files.
     '''
     parser = argparse.ArgumentParser(description="APBS (sphinx)")
+    parser.add_argument('-d', '--debug', action='store_true', help="enable debugging")
     parser.add_argument('command_file', metavar='cmd_file', nargs=1,
-        help="file containing APBS commands, followed by it's arguments")
-    parser.add_argument('cmd_args', nargs=argparse.REMAINDER)
+                        help="file containing APBS commands, followed by it's arguments")
+    parser.add_argument('cmd_args',
+                        help="arguments passed to the pipeline file, e.g., infile=1fas.pdb",
+                        nargs=argparse.REMAINDER)
     args = parser.parse_args()
 
     cmd = args.command_file[0]
     cmd_args = args.cmd_args
+    debug = args.debug
+
     _log.info('Command file: {}, args: {}'.format(cmd, cmd_args))
 
-    return cmd, cmd_args
+    return debug, cmd, cmd_args
 
 
 def main():
@@ -85,12 +90,15 @@ def main():
         _log.info('Hello world, from APBS (sphinx).')
 
         # Get files from the command line
-        cmd, args = parse_args()
+        debug, cmd, args = parse_args()
+
+        if debug:
+            logging.basicConfig(level=logging.DEBUG)
+            warnings.simplefilter('default', ResourceWarning)
 
         # Create, and start the "Coordinator"
         coordinator = Coordinator(PLUGIN_DIR)
-        coordinator.start(cmd, args)
-
+        coordinator.start(cmd, args, debug=debug)
     except Exception as e:
         coordinator.stop()
         _log.exception('Unhandled exception:')

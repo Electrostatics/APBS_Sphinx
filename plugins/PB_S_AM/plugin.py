@@ -38,56 +38,51 @@
 # THE POSSIBILITY OF SUCH DAMAGE.
 #}}}
 
-import asyncio
 import logging
 
 from sphinx.plugin import BasePlugin
 
-__author__ = 'Keith T. Star <keith@pnnl.gov>'
+from .pbam_sph import PBAM_Solver
+
+__author__ = 'Lisa Felberg <lisa.felberg@pnnl.gov>'
 
 _log = logging.getLogger()
 
-def define_types(tm):
-    '''Initialize Types
-    Create type definitions for anthing that we source or sink, that isn't
-    already defined by Sphinx Core.
-    We are passed the TypeManager instance to use.
+def run_pbam(molecules):
+    '''Start the pbam process.
+    We have to instantiate the solver, and then run 'run_pbam' in the
+    same process.
     '''
-    # TODO: This should probably include the encoding, e.g., UTF-8, etc.
-    # I'm not doing that now though because it opens a huge can of worms:
-    # having to explicitly deal with character encodings, etc.
-    tm.define_type('text',
-                   {
-                       'lines': {
-                           'type': 'array',
-                           'items': {'type': 'string'}
-                       }
-                   })
+    # TODO: All of the following belong in a configuration file.
+    # It would assist the user
+    # with the meaning of the various values, as well as tracking, naming and
+    # locating the configs the user has created.
+    solver = PBAM_Solver(temp=300.0, epsilons=80.00, epsiloni=1.5)
+
+    result = solver.run_solv(molecules)
+
+    del solver
+    return result
 
 
-LINE_COUNT = 100
-
-class ReadFile(BasePlugin):
-    '''Plugin for reading a file
-    This reads a text file, and yields a single line at a time.  We'll likely
-    as not find that we need different sorts of readers.  The source type for
-    this plugin should reflect the type of data that it produces.
+class PB_S_AM(BasePlugin):
+    '''Plugin for running pbam flow
     '''
-    def __init__(self, file, **kwargs):
+    def __init__(self, **kwargs):
+        self._molecules = []
+
         super().__init__(**kwargs)
-
-        self._file = file
-        _log.info("ReadFile plug-in initialized.")
+        _log.info("PBAM plug-in initialized.")
 
 
     @classmethod
     def script_name(cls):
-        return "read_file"
+        return "pbam"
 
 
     @classmethod
     def sinks(cls):
-        return ['file']
+        return ['apbs_atom']
 
 
     @classmethod
@@ -95,42 +90,34 @@ class ReadFile(BasePlugin):
         return ['text']
 
 
-    # I don't know that these are necessary, so much as they may prove to be
-    # pedagogical.
-    async def open(self):
-        return open(self._file, 'r')
-
-    async def read_lines(self, file):
-        lines = []
-        for c in range(LINE_COUNT):
-            line = file.readline()
-
-            if line == "":
-                break
-
-            lines.append(line)
-
-        return lines
-
-
     async def run(self):
-        # Note that we are opening and reading the file asynchronously.
-        file = await self.open()
-        lines = await self.read_lines(file)
+        try:
+            # Collect all of the atoms that are available.
+            while True:
+                data = await self.read_data()
+                if data:
+                    value = data['apbs_atom']
+                    self._molecules.append({
+                        'pos': (
+                            value['Cartn_x'],
+                            value['Cartn_y'],
+                            value['Cartn_z']
+                        ),
+                        'radius': value['radius'],
+                        'charge': value['charge']
+                    })
+                else:
+                    break
 
-        while lines:
-            data = self._tm.new_text({'lines': lines})
-            await self.publish(data)
+            # Run Geoflow in a separate process
+            result = await self.runner.run_as_process(run_pbam,
+                    {'atoms': self._molecules})
 
-            # This sleep allows subsequent plugins to start doing their
-            # thing.
-            await asyncio.sleep(0)
+            await self.publish(self._tm.new_text(lines=[str(result)]))
 
-            lines = await self.read_lines(file)
-
-
-        await self.done()
-        file.close()
+            await self.done()
+        except Exception as e:
+            _log.exception('Unhandled exception:')
 
 
     def xform_data(self, data, to_type):

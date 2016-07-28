@@ -38,7 +38,6 @@
 # THE POSSIBILITY OF SUCH DAMAGE.
 #}}}
 
-import asyncio
 import logging
 
 from sphinx.plugin import BasePlugin
@@ -69,7 +68,7 @@ class ParsePDB(BasePlugin):
         super().__init__(**kwargs)
 
         self._pdb = {'idCode': None, 'atoms': []}
-        
+
         _log.info("ParsePDB plug-in initialized.")
 
 
@@ -88,10 +87,9 @@ class ParsePDB(BasePlugin):
         return ['pdb_file', 'text']
 
 
-    @asyncio.coroutine
-    def run(self):
+    async def run(self):
         while True:
-            data = yield from self.read_data()
+            data = await self.read_data()
             if data:
                 for line in data['text']['lines']:
                     record_type, record_data = parsePDBRecord(line)
@@ -104,7 +102,7 @@ class ParsePDB(BasePlugin):
                         # maps MOL_ID to ATOM entries -- somehow.  It's not clear
                         # how it manages this from the specification.
                         pass
-                        
+
                     elif record_type == 'ATOM' or record_type == 'HETATM':
                         atom = {'group_PDB': record_type,
                                 'id': str(record_data.serial),
@@ -123,16 +121,15 @@ class ParsePDB(BasePlugin):
                                 'label_entity_id': "1"} # TODO: Fix this.  See COMPND, above.
                         if record_data.charge:
                             atom['pdbx_formal_charge'] = record_data.charge
-                            
+
                         self._pdb['atoms'].append(atom)
-                                
+
             else:
                 break
 
         # We need to wait until the entire PDB file is read before we can publish.
-        self._tm.new_pdb_file(self._pdb)
-        yield from self.publish((self._pdb))
-        yield from self.done()
+        await self.publish(self._pdb)
+        await self.done()
 
 
     def xform_data(self, data, to_type):
@@ -142,12 +139,12 @@ class ParsePDB(BasePlugin):
             return self._tm.new_pdb(data)
 
         elif to_type == 'text':
-            lines = ['id: ' + data['idCode'] + '\n']
+            lines = ['id: ' + data['idCode']]
             for a in data['atoms']:
                 atom = ''
                 for x, y in a.items():
                     atom += x + ': ' + str(y) + '\t'
 
-                lines.append(atom + '\n')
+                lines.append(atom)
 
             return self._tm.new_text(lines=lines)
