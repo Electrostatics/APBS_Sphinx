@@ -1,0 +1,18 @@
+# Example to run a TABIPB calculation.
+#
+# Thinking that read_file is how a chain is always started, with more to be added as
+# deemed necessary.
+# In addition, I think it would be useful to add something that can feed data from
+# here directly into a plugin.  Something like this:
+#  input = [{record}, {record}, ...]
+#  send(input).run_geoflow
+
+tabipb_output = (
+    read_file(params['infile'])
+        .parse_xyzr()
+        .tabipb()
+)
+
+tabipb_output.write_file(params['outfile'])
+
+tabipb_output.write_stdout()
