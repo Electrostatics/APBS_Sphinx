@@ -102,24 +102,29 @@ class BasePlugin(metaclass=ABCMeta):
 
         # Set options on our subclass
         if opt_schema:
-            self._os = OptionHandler(opt_schema)
+            self._opt_handler = OptionHandler(opt_schema)
 
             if options:
-                self._os.validate(options)
+                # Try it as a file object
+                try:
+                    options = json.loads(options.read())
+                except AttributeError:
+                    # Try it as a file path
+                    try:
+                        with open(options) as f:
+                            options = json.loads(f.read())
+                    except:
+                        # Try it as a string
+                        try:
+                            options = json.loads(options)
+                        except TypeError:
+                            # It must be a Python object
+                            pass
+
+                self._opts = options
+
+                self._opt_handler.validate(self._opts)
                 
-            # if type(opt_schema) == str:
-            #     # Assume it's a file name
-            #     with open(opt_schema) as f:
-            #         opt_schema = json.loads(f.read())
-
-            # try:
-            #     validate(opt_schema, _option_schema)
-            # except ValidationError:
-            #     _log.error('Plugin option validation error.')
-            #     raise
-
-            # if options:
-
 
         # create_task schedules the execution of the coroutine "run", wrapped
         # in a future.
