@@ -68,7 +68,7 @@ class PDB2PQR(BasePlugin):
 
     @classmethod
     def sinks(cls):
-        return ['text']
+        return None
 
 
     @classmethod

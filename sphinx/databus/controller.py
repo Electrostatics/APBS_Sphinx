@@ -94,15 +94,17 @@ class SDBController:
              'and sinks {}.'.format(plugin.sinks()))
         plugin.set_databus(self)
 
-        for source in plugin.sources():
-            if not source in self._source_types:
-                self._source_types[source] = []
-            self._source_types[source].append(plugin)
+        if plugin.sources():
+            for source in plugin.sources():
+                if not source in self._source_types:
+                    self._source_types[source] = []
+                self._source_types[source].append(plugin)
 
-        for sink in plugin.sinks():
-            if not sink in self._sink_types:
-                self._sink_types[sink] = []
-            self._sink_types[sink].append(plugin)
+        if plugin.sinks():
+            for sink in plugin.sinks():
+                if not sink in self._sink_types:
+                    self._sink_types[sink] = []
+                self._sink_types[sink].append(plugin)
 
 
     def sources_for(self, type):

@@ -87,7 +87,7 @@ class ReadFile(BasePlugin):
 
     @classmethod
     def sinks(cls):
-        return ['file']
+        return None
 
 
     @classmethod

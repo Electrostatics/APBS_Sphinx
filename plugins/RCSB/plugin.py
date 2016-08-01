@@ -25,7 +25,7 @@ class RCSB(BasePlugin):
 
     @classmethod
     def sinks(cls):
-        return ['text']
+        return None
 
 
     @classmethod

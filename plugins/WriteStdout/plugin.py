@@ -70,7 +70,7 @@ class WriteStdout(BasePlugin):
 
     @classmethod
     def sources(cls):
-        return ['text']
+        return None
 
 
     async def run(self):

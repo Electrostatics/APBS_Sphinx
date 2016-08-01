@@ -70,7 +70,7 @@ class WriteFile(BasePlugin):
 
     @classmethod
     def sources(cls):
-        return ['file']
+        return None
 
 
     async def run(self):
