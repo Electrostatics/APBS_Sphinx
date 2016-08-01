@@ -38,8 +38,8 @@
 # THE POSSIBILITY OF SUCH DAMAGE.
 #}}}
 
-#import asyncio
 import logging
+import os
 
 from sphinx.plugin import BasePlugin
 from .main import mainCommand
@@ -51,15 +51,12 @@ _log = logging.getLogger()
 class PDB2PQR(BasePlugin):
     '''Stuff PDB2PQR into Sphnx
     '''
-    def __init__(self, pdb=None, opts={}, **kwargs):
-        super().__init__(**kwargs)
+    def __init__(self, opts={}, **kwargs):
+        opt_schema_file = os.path.join(os.path.dirname(__file__), "options.json")
 
-        print(pdb, opts)
-
-        self._pdb = pdb
-        self._ff = opts['ff']
-
-        print(self._pdb, self._ff)
+        # After instantiating the super class, self._opts will contain the options
+        # passed to the plugin.
+        super().__init__(opt_schema=opt_schema_file, options=opts, **kwargs)
 
         _log.info("PDB2PQR plug-in initialized.")
 
@@ -80,7 +77,30 @@ class PDB2PQR(BasePlugin):
 
 
     async def run(self):
-        pqr = mainCommand(['pdb2pqr-sphinx', '-v', '--ff={}'.format(self._ff), self._pdb])
+        cmd = ['pdb2pqr-sphinx']
+        print(self._opt_handler.get_misc('ff'))
+        for k, v in self._opts.items():
+            print('foo', k, v)
+            if k != 'pdb':
+                try:
+                    misc = self._opt_handler.get_misc(k)
+                    print(misc)
+                    cmd.append(misc['cmd_opt'].format(v))
+                except KeyError:
+                    pass
+
+            else:
+                pdb = v
+
+            print('cmd', cmd)
+
+
+        cmd.append(pdb)
+        print(cmd)
+    
+#        pqr = mainCommand(['pdb2pqr-sphinx', '-v', '--ff={}'.format(self._ff), self._pdb])
+
+        pqr = mainCommand(cmd)
 
         await self.publish(self._tm.new_text({'lines': pqr.split('\n')}))
         await self.done()
