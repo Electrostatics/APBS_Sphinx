@@ -41,6 +41,7 @@
 from nose.tools import *
 
 from functools import partial
+import os
 
 from sphinx.plugin import *
 
@@ -52,7 +53,7 @@ def setup_runner():
 
 
 @with_setup(setup_runner)
-def test_impedence():
+def test_impedence_success():
     '''Test Impedence Match
 
     Validate that impedence checking works ok when the source matches the sink.
@@ -77,9 +78,10 @@ class TestRunner():
     def __init__(self):
         self._plugin_dict = {}
 
-        self._plugin_dict = {'source': None, 'sink': None}
+        self._plugin_dict = {'source': None, 'sink': None, 'foo': None}
         self._plugin_dict['sink'] = partial(SinkPlugin, runner=self, plugins=self._plugin_dict)
         self._plugin_dict['source'] = partial(SourcePlugin, runner=self, plugins=self._plugin_dict)
+        self._plugin_dict['foo'] = partial(FooPlugin, runner=self, plugins=self._plugin_dict)
 
     def load(self, plugin):
         return self._plugin_dict[plugin]
@@ -90,7 +92,11 @@ class TestRunner():
 
 class SourcePlugin(BasePlugin):
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        with open(os.path.join(os.path.dirname(__file__), 'test_schema.json')) as f:
+            schema = f.read()
+
+        # Test the schema with a string
+        super().__init__(opt_schema = schema, **kwargs)
 
     @classmethod
     def sources(cls):
@@ -105,7 +111,10 @@ class SourcePlugin(BasePlugin):
 
 class SinkPlugin(BasePlugin):
     def __init_(self, **kwargs):
-        super().__init__(**kwargs)
+        schema = os.path.join(os.path.dirname(__file__), 'test_schema.json')
+
+        # Test the schema with a file path
+        super().__init__(opt_schema = schema, **kwargs)
 
     @classmethod
     def sinks(cls):
@@ -116,3 +125,30 @@ class SinkPlugin(BasePlugin):
 
     def xform_data(self, data, to_type):
         pass
+
+
+class FooPlugin(BasePlugin):
+    """Useless Plugin
+    Does nothing.  Takes nothing.  Emits nothing.
+    """
+    def __init_(self, **kwargs):
+        # Test without a schema
+        super().__init__(opt_schema = schema, **kwargs)
+
+    # Test with sources and sinks None.
+    @classmethod
+    def sources(cls):
+        return None
+    
+    @classmethod
+    def sinks(cls):
+        return None
+
+    def run(self):
+        pass
+
+    def xform_data(self, data, to_type):
+        pass
+
+
+

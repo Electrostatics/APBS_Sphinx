@@ -211,6 +211,11 @@ def test_bad_schema():
 def test_init_with_file():
     with open(os.path.join(os.path.dirname(__file__), 'test_schema.json')) as f:
         OptionHandler(f)
+
+
+def test_init_with_file_path():
+    OptionHandler(os.path.join(os.path.dirname(__file__), 'test_schema.json'))
+
     
 
 # Validation Tests

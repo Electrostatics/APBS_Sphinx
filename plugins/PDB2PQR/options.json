@@ -1,0 +1,474 @@
+[
+	{
+		"all": {
+			"title": "Manditory Options",
+			"options": [
+				{
+					"name": "PDB",
+					"var": "pdb",
+					"type": "string",
+					"description": "Either a PDB ID, or the path to a PDB file."
+				},
+				{
+					"one": {
+						"options": [
+							{
+								"name": "Force Field",
+								"var": "ff",
+								"misc": {
+									"cmd_opt": "--ff={}"
+								},
+								"type": "enum",
+								"allowedValues": [ "amber", "charm", "parse", "tyl06", "peoepb", "swanson" ],
+								"description": "The force field to use."
+							},
+							{
+								"all": {
+									"options": [
+										{
+											"name": "User Force Field",
+											"var": "userff",
+											"misc": {
+												"cmd_opt": "--userff={}"
+											},
+											"type": "string",
+											"description": "File containing a user created force field."
+										},
+										{
+											"name": "User names",
+											"var": "usernames",
+											"misc": {
+ 												"cmd_opt": "--usernames={}"
+											},
+											"type": "string",
+											"description": "File containing user created names."
+										}
+									]
+								}
+							},
+							{
+								"name": "Clean",
+								"var": "clean",
+								"misc": {
+									"cmd_opt": "--clean"
+								},
+								"type": "bool",
+								"description": "Simply return origital PDB file, properly aligned."
+							}
+						]
+					}
+				}
+			]
+		}
+	},
+	{
+		"any": {
+			"title": "General Options",
+			"options": [
+				{
+					"name": "No debump",
+					"var": "nodebump",
+					"misc": {
+						"cmd_opt": "--nodebump"
+					},
+					"type": "bool",
+					"description": "Do not perform debumping operation."
+				},
+				{
+					"name": "No H Optimization",
+					"var": "noopt",
+					"misc": {
+						"cmd_opt": "--noopt"
+					},
+					"type": "bool",
+					"description": "Do not perform Hydrogen optimization."
+				},
+				{
+					"name": "Chain ID's",
+					"var": "chain",
+					"misc": {
+						"cmd_opt": "--chain"
+					},
+					"type": "bool",
+					"description": "Keep chain ID's in output PQR."
+				},
+				{
+					"name": "Assign Only",
+					"var": "assign_only",
+					"misc": {
+						"cmd_opt": "--assign-only"
+					},
+					"type": "bool",
+					"description": "Only assign charges and radii -- do not ad atoms, dubump, or optimize."
+				},
+				{
+					"name": "Use force field names",
+					"var": "ffout",
+					"misc": {
+						"cmd_opt": "--ffout"
+					},
+					"type": "enum",
+					"allowedValues": [ "amber", "charm", "parse", "tyl06", "peoepb", "swanson" ],
+					"description": "Use force field names for atom and residue names."
+				},
+				{
+					"name": "User Names File",
+					"var": "misc",
+					"misc": {
+						"cmd_opt": "--usernames={}"
+					},
+					"type": "string",
+					"description": "File containing user created names."
+				},
+				{
+					"name": "APBS Input File",
+					"var": "apbs_input",
+					"misc": {
+						"cmd_opt": "--apbs-input"
+					},
+					"type": "bool",
+					"description": "Generate an APBS input file suitable for the generated PQR."
+				},
+				{
+					"name": "Whitespace",
+					"var": "whitespace",
+					"misc": {
+						"cmd_opt": "--whitespace"
+					},
+					"type": "bool",
+					"description": "Insert whitespace between atom name and residue name, between x and y, and between y and z."
+				},
+				{
+					"name": "Typemap",
+					"var": "typemap",
+					"misc": {
+						"cmd_opt": "--typemap"
+					},
+					"type": "bool",
+					"description": "Create typemap output."
+				},
+				{
+					"name": "Neutral N-terminus",
+					"var": "neutraln",
+					"misc": {
+						"cmd_opt": "--neutraln"
+					},
+					"type": "bool",
+					"description": "Make the N-terminus of this protein neutral (default is charged). Requires PARSE force field."
+				},
+				{
+					"name": "Neutral C-terminus",
+					"var": "neutralc",
+					"misc": {
+						"cmd_opt": "--neutralc"
+					},
+					"type": "bool",
+					"description": "Make the C-terminus of this protein neutral (default is charged). Requires PARSE force field."
+				},
+				{
+					"name": "Verbose",
+					"var": "verbose",
+					"misc": {
+						"cmd_opt": "--verbose"
+					},
+					"type": "bool",
+					"description": "Log additional run-time information."
+				},
+				{
+					"name": "Drop Water",
+					"var": "drop_water",
+					"misc": {
+						"cmd_opt": "--drop-water"
+					},
+					"type": "bool",
+					"description": "Drop waters before processing protein. Currently recognized and deleted are the following water types: HOH, WAT."
+				},
+				{
+					"name": "Include Header",
+					"var": "include_header",
+					"misc": {
+						"cmd_opt": "--include-header"
+					},
+					"type": "bool",
+					"description": "Include PDB header in PQR file. WARNING: The resulting PQR file will not work with APBS versions prior to 1.5"
+				}
+			]	
+		}
+	},
+	{
+		"any": {
+			"title": "pH Options",
+			"options": [
+				{
+					"name": "pH Calculation Method",
+					"var": "ph_calc_method",
+					"misc": {
+						"cmd_opt": "--ph-calc-method={}"
+					},
+					"type": "enum",
+					"allowedValues": ["propka", "pdb2pka"],
+					"description": "Method used to calculate pH values. If a method is selected, for each titratable residue, pH values will be calculated, and the residue potentially modified after comparison with the pH value supplied by --with_ph. propka -- Use PROPKA to calculate pH values. Actual PROPKA results will be output to <output-path>.propka. pdb2pka -- Use PDB2PKA to calculate pH values. Requires the use of the PARSE force field. Warning: larger residues may take a very long time to run using this method.  EXPERIMENTAL! "
+				},
+				{
+					"name": "With pH",
+					"var": "with_ph",
+					"misc": {
+						"cmd_opt": "--with-ph={}"
+					},
+					"type": "float",
+					"description": "pH values to use when applying the results of the selected pH calculation method. Defaults to 7.0."
+				}
+			]
+		}
+	},
+	{
+		"any": {
+			"title": "PDB2PKA Options",
+			"options": [
+				{
+					"name": "PDB2PKA Output Directory",
+					"var": "pdb2pka_out",
+					"misc": {
+						"cmd_opt": "--pdb2pka-out={}"
+					},
+					"type": "string",
+					"description": "Output directory for PDB2PKA results. Defaults to 'pdb2pka_output'."
+				},
+				{
+					"name": "PDB2PKA Resume",
+					"var": "pdb2pka_resume",
+					"misc": {
+						"cmd_opt": "--pdb2pka-resume"
+					},
+					"type": "bool",
+					"description": "Resume run from state saved in output directory."
+				},
+				{
+					"name": "Protein Dielectric Constant",
+					"var": "pdie",
+					"misc": {
+						"cmd_opt": "--pdie={}"
+					},
+					"type": "float",
+					"description": "Defaults to 8.0."
+				},
+				{
+					"name": "Solvent Dielectric Constant",
+					"var": "sdie",
+					"misc": {
+						"cmd_opt": "--sdie={}"
+					},
+					"type": "float",
+					"description": "Defaults to 80.0."
+				},
+				{
+					"name": "PAIRNE?",
+					"var": "pairne",
+					"misc": {
+						"cmd_opt": "--pairne={}"
+					},
+					"type": "float",
+					"description": "Cutoff energy in kT for calculating non charged-charged interaction energies.  Default: 1.0."
+				}
+			]
+		}
+	},
+ 	{
+		"any": {
+			"title": "PROPKA Options",
+			"options": [
+				{
+					"name": "PROPKA Reference",
+					"var": "propka_reference",
+					"misc": {
+						"cmd_opt": "--propka-reference={}"
+					},
+					"type": "enum",
+					"allowedValues": ["neutral", "low-pH"],
+					"description": "Setting which reference to use for stability calculations. See PROPKA 3.0 documentation."
+				},
+				{
+					"name": "PROPKA Verbose",
+					"var": "propka_verbose",
+					"misc": {
+						"cmd_opt": "--propka-verbose"
+					},
+					"type": "bool",
+					"description": "Print extra PROPKA information to stdout. WARNING: this produces an incredible amount of output."
+				}
+			]
+		}
+	},
+	{
+		"any": {
+			"title": "Extension Options",
+			"options": [
+				{
+					"name": "Print Chi Angle",
+					"var": "chi",
+					"misc": {
+						"cmd_opt": "--chi"
+					},
+					"type": "bool",
+					"description": "Print the per-residue backbone chi angle to {output-path}.chi."
+				},
+				{
+					"name": "Print Summary",
+					"var": "summary",
+					"misc": {
+						"cmd_opt": "--summary"
+					},
+					"type": "bool",
+					"description": "Print protein summary information to {output-path}.summary."
+				},
+				{
+					"name": "Print Contacts",
+					"var": "contact",
+					"misc": {
+						"cmd_opt": "--contact"
+					},
+					"type": "bool",
+					"description": "Print a list of contacts to {output-path}.con."
+				},
+				{
+					"name": "Print Residue Interaction Energies",
+					"var": "newresinter",
+					"misc": {
+						"cmd_opt": "--newresinter"
+					},
+					"type": "bool",
+					"description": "Print interaction energy between each residue pair in the protein to {output-pach}.newresinter."
+				},
+				{
+					"name": "Print Salt Bridges",
+					"var": "salt",
+					"misc": {
+						"cmd_opt": "--salt"
+					},
+					"type": "bool",
+					"description": "Print a list of salt bridges to {output-path}.salt."
+				}
+			]
+		}
+	},
+ 	{
+		"any": {
+			"title": "Hbond Extension Options",
+			"options": [
+				{
+					"name": "Print Hydrogen Bonds",
+					"var": "hbond",
+					"misc": {
+						"cmd_opt": "--hbond"
+					},
+					"type": "bool",
+					"description": "Print a list of hydrogen bonds to {output-path}.hbond."
+				},
+				{
+					"name": "What If? Format",
+					"var": "whatif",
+					"misc": {
+						"cmd_opt": "--whatif"
+					},
+					"type": "bool",
+					"description": "Change hbond output to WHAT-IF format."
+				},
+				{
+					"name": "Angle Cutoff",
+					"var": "angle_cutoff",
+					"misc": {
+						"cmd_opt": "--angle_cutoff={}"
+					},
+					"type": "float",
+					"description": "Angle cutoff to use when creating hbond data (default 30.0)."
+				},
+				{
+					"name": "Distance Cutoff",
+					"var": "distance_cutoff",
+					"misc": {
+						"cmd_opt": "--distance_cutoff={}"
+					},
+					"type": "float",
+					"description": "Distance cutoff to use when creating hbond data (default 3.4)."
+				},
+				{
+					"name": "Old Distance Method",
+					"var": "old_distance_method",
+					"misc":{ 
+						"cmd_opt": "--old_distance_method"
+					},
+					"type": "bool",
+					"description": "Use distance from donor hydrogen to acceptor to calculate distance used with --distance_cutoff."
+				}
+			]
+		}
+	},
+ 	{
+		"any": {
+			"title": "Resinter Extension Options",
+			"options": [
+				{
+					"name": "Output Pairwise Interaction Energies",
+					"var": "resinter",
+					"misc": {
+						"cmd_opt": "--resinter"
+					},
+					"type": "bool",
+					"description": "Print interaction energy between each residue pair in the protein to {output-path}.resinter."
+				},
+				{
+					"name": "Remap Residues to Different Titration States",
+					"var": "residue_combinations",
+					"misc": {
+						"cmd_opt": "--residue_combinations"
+					},
+					"type": "bool",
+					"description": "Remap residues to different titration states and rerun resinter appending output. Consider only the minimum number of whole protein titration combinations needed to test each possible pairing of residue titration states. Normally used with --noopt. If a protein titration state combination results in a pair of residue being re-tested in the same individual titration states a warning will be generated if the re-tested result is different. This warning should not be possible if used with --noopt."
+				},
+				{
+					"name": "Remap Residues to ALL Titration States",
+					"var": "all_residue_combinations",
+					"misc": {
+						"cmd_opt": "--all_residue_combinations"
+					},
+					"type": "bool",
+					"description": "Remap residues to ALL possible titration state combinations and rerun resinter appending output. Results with --noopt should be the same as --residue_combinations. Runs considerably slower than warnings. Use without --noopt to discover how hydrogen optimization affects residue interaction energies via the warnings in the output."
+				}
+			]
+		}
+	},
+ 	{
+		"any": {
+			"title": "Rama Extension Options",
+			"options": [
+				{
+					"name": "Rama",
+					"var": "rama",
+					"misc": {
+						"cmd_opt": "--rama"
+					},
+					"type": "bool",
+					"description": "Print the per-residue φ and ψ angles to {output-path}.rama for Ramachandran plots."
+				},
+				{
+					"name": "φ Only",
+					"var": "phi_only",
+					"misc": {
+						"cmd_opt": "--phi_only"
+					},
+					"type": "bool",
+					"description": "Only include φ angles in output. Rename output file {output-path}.phi."
+				},
+				{
+					"name": "ψ Only",
+					"var": "psi_only",
+					"misc": {
+						"cmd_opt": "--psi_only"
+					},
+					"type": "bool",
+					"description": "Only include ψ angles in output. Rename output file {output-path}.psi."
+				}
+			]
+		}
+	}
+]

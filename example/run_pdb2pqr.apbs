@@ -1,0 +1,4 @@
+# Run PDB2PQR
+#
+pqr = pdb2pqr(opts=params['opts'])
+pqr.write_file(params['output'])
