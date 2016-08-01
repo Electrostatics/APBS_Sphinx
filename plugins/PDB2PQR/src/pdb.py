@@ -2292,7 +2292,14 @@ def readPDB(file):
         return pdblist, errlist
 
     while 1:
-        line = file.readline().strip()
+        line = file.readline()
+        try:
+            line = line.decode('utf-8')
+        except AttributeError:
+            pass
+
+        line = line.strip()
+        
         if line == '':
             break
 
