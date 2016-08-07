@@ -46,6 +46,7 @@ from sphinx.plugin import BasePlugin
 from .tabipb_sph import TABIPB_Solver
 
 __author__ = 'Jiahui Chen <jiahuic@smu.edu>'
+# 08/06/2016 updated by Leighton Wilson <lwwilson@umich.edu>
 
 _log = logging.getLogger()
 
@@ -59,7 +60,7 @@ def run_tabipb(molecules):
     # locating the configs the user has created.
     solver = TABIPB_Solver(density=2.02, probe_radius=1.4, epsp=1.0,
              epsw=80.0, bulk_strength=1.5, order=3, maxparnode=500,
-             theta=0.8, temp=300.00, mesh_flag=0)
+             theta=0.8, temp=300.00, mesh_flag=0, output_datafile=1)
 
     result = solver.run_solve(molecules)
 
@@ -112,7 +113,7 @@ class TABIPB(BasePlugin):
                 else:
                     break
 
-            # Run Geoflow in a separate process
+            # Run TABIPB in a separate process
             result = yield from self.runner.run_as_process(run_tabipb,
                     {'atoms': self._molecules})
 
